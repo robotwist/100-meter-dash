@@ -15,12 +15,12 @@ const giantButton = document.getElementById('giantButton');
 
 // Character selection logic
 boltButton.addEventListener('click', () => {
-  runnerSprite.src = 'boltSprite.png';  // Replace with actual sprite URL
+  runnerSprite.src = 'bolt-sprite.gif';  // Ensure this path is correct
   startGame();
 });
 
 giantButton.addEventListener('click', () => {
-  runnerSprite.src = 'giantSprite.png';  // Replace with actual sprite URL
+  runnerSprite.src = 'giantSprite.png';  // Ensure this path is correct
   startGame();
 });
 
