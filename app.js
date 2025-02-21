@@ -13,24 +13,6 @@ const runnerSprite = document.getElementById('runnerSprite');
 const boltButton = document.getElementById('boltButton');
 const giantButton = document.getElementById('giantButton');
 
-const runnerSprite = document.getElementById('runnerSprite');
-const boltButton = document.getElementById('boltButton');
-const giantButton = document.getElementById('giantButton');
-
-// Character selection logic
-boltButton.addEventListener('click', () => {
-  runnerSprite.src = 'A_sprite_of_a_100_meter_runner_inspired_by_Usain_B.png';  // Replace with actual sprite path
-  startGame();
-});
-
-giantButton.addEventListener('click', () => {
-  runnerSprite.src = 'A_sprite_of_a_100_meter_runner_inspired_by_André_t.png';  // Replace with actual sprite path
-  startGame();
-});
-
-// Add the existing game logic for distance and time here...
-
-
 // Character selection logic
 boltButton.addEventListener('click', () => {
   runnerSprite.src = 'boltSprite.png';  // Replace with actual sprite URL
@@ -42,8 +24,16 @@ giantButton.addEventListener('click', () => {
   startGame();
 });
 
-// Add the existing game logic for distance and time here...
-
+// Function to start the game
+function startGame() {
+  distance = 0;
+  timeElapsed = 0;
+  runButton.disabled = false;
+  distanceDisplay.textContent = distance.toFixed(1);
+  progressBar.style.width = '0%';
+  startTime = new Date();
+  gameInterval = setInterval(trackTime, 10);
+}
 
 // Function to update the game every time the button is clicked
 runButton.addEventListener('click', () => {
@@ -72,6 +62,3 @@ function trackTime() {
     timeDisplay.textContent = timeElapsed.toFixed(2);
   }
 }
-
-// Start the time tracking when the game begins
-gameInterval = setInterval(trackTime, 10);

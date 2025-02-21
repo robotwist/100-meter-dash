@@ -4,76 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>100 Meter Dash Game</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
-    #game {
-      text-align: center;
-    }
-    #runButton {
-      padding: 10px 20px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    #progress {
-      height: 20px;
-      width: 100%;
-      background-color: lightgray;
-      margin-top: 10px;
-    }
-    #progressBar {
-      height: 100%;
-      width: 0%;
-      background-color: green;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="characterSelection">
-        <h2>Select Your Runner:</h2>
-        <button id="boltButton">Usain Bolt</button>
-        <button id="giantButton">André the Giant</button>
-      </div>
-      
-      <div id="game">
-        <h1>100 Meter Dash!</h1>
-        <div id="runner">
-          <img id="runnerSprite" src="" alt="Runner">
-        </div>
-        <p>Distance: <span id="distance">0</span> meters</p>
-        <button id="runButton">Run!</button>
-        <p>Time elapsed: <span id="timeElapsed">0.00</span> seconds</p>
-        <div id="progress">
-          <div id="progressBar"></div>
-        </div>
-      </div>
-      <div id="characterSelection">
-        <h2>Select Your Runner:</h2>
-        <button id="boltButton">Usain Bolt</button>
-        <button id="giantButton">André the Giant</button>
-      </div>
-      
-      <div id="game">
-        <h1>100 Meter Dash!</h1>
-        <div id="runner">
-          <img id="runnerSprite" src="" alt="Runner">
-        </div>
-        <p>Distance: <span id="distance">0</span> meters</p>
-        <button id="runButton">Run!</button>
-        <p>Time elapsed: <span id="timeElapsed">0.00</span> seconds</p>
-        <div id="progress">
-          <div id="progressBar"></div>
-        </div>
-      </div>
-      
-      
+  <div id="characterSelection">
+    <h2>Select Your Runner:</h2>
+    <button id="boltButton">Usain Bolt</button>
+    <button id="giantButton">André the Giant</button>
+  </div>
+  
   <div id="game">
     <h1>100 Meter Dash!</h1>
+    <div id="runner">
+      <img id="runnerSprite" src="" alt="Runner">
+    </div>
     <p>Distance: <span id="distance">0</span> meters</p>
     <button id="runButton">Run!</button>
     <p>Time elapsed: <span id="timeElapsed">0.00</span> seconds</p>
