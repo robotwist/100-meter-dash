@@ -17,9 +17,19 @@ let player1Time = 0;
 let player2Time = 0;
 let buttonGrowthFactor = 1; // Variable for button size
 let isMobileDevice = false; // Flag for detecting mobile devices
-let gameState = 'selection'; // Tracks current game state: selection, countdown, racing, finished
+let gameState = 'selection'; // Tracks current game state: selection, countdown, racing, finished, post-race
 let difficultyFactor = 0.65; // Adjusted to make game challenging but allow for realistic times
 let celebrationActive = false; // Flag to track if celebration sequence is active
+let currentLevel = 1; // Current game level
+let maxRegularLevels = 5; // Number of regular levels before space level
+let spaceModeActive = false; // Flag for space mode (level 6+)
+let powerUps = []; // Array to store active power-ups in space mode
+let aliensDefeated = 0; // Counter for defeated aliens in space mode
+let viewingLeaderboard = false; // Flag for when viewing the leaderboard
+let topTimesData = {}; // Object to store top times for each level
+let pendingInitialsEntry = null; // Object to store pending top time entry needing initials
+let currentInitialsPosition = 0; // Tracks current position in initials input
+let currentInitials = "AAA"; // Default initials value
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -33,6 +43,374 @@ const result = document.getElementById('result');
 const winnerText = document.getElementById('winnerText');
 const finishTime = document.getElementById('finishTime');
 const countdownDisplay = document.getElementById('countdown');
+const postRaceScreen = document.getElementById('postRaceScreen');
+const levelDisplay = document.getElementById('levelDisplay');
+const postRaceTimeInfo = document.getElementById('postRaceTimeInfo');
+const continueButton = document.getElementById('continueButton');
+const leaderboardScreen = document.getElementById('leaderboardScreen');
+const leaderboardContent = document.getElementById('leaderboardContent');
+const leaderboardTabs = document.getElementById('leaderboardTabs');
+const viewLeaderboardBtn = document.getElementById('viewLeaderboardBtn');
+const backFromLeaderboardBtn = document.getElementById('backFromLeaderboardBtn');
+const initialsPopup = document.getElementById('initialsPopup');
+const initialsInput = document.getElementById('initialsInput');
+const recordPositionDisplay = document.getElementById('recordPosition');
+const recordTimeDisplay = document.getElementById('recordTime');
+const submitInitialsBtn = document.getElementById('submitInitials');
+const charUpBtn = document.getElementById('charUp');
+const charDownBtn = document.getElementById('charDown');
+const selectedCharDisplay = document.querySelector('.selected-char');
+
+// Initialize top times data
+function initializeTopTimes() {
+  // Try to load saved data from localStorage
+  const savedData = localStorage.getItem('100meterDashTopTimes');
+  
+  if (savedData) {
+    topTimesData = JSON.parse(savedData);
+  } else {
+    // Initialize empty data for each level
+    topTimesData = {
+      'level1': [],
+      'level2': [],
+      'level3': [],
+      'level4': [],
+      'level5': [],
+      'space': []
+    };
+    
+    // Save the initial empty data
+    saveTopTimes();
+  }
+}
+
+// Save top times to localStorage
+function saveTopTimes() {
+  localStorage.setItem('100meterDashTopTimes', JSON.stringify(topTimesData));
+}
+
+// Check if a time would qualify for the top 5
+function wouldQualifyForTopTimes(level, time) {
+  const levelKey = level > maxRegularLevels ? 'space' : `level${level}`;
+  
+  // If we don't have 5 times yet, it automatically qualifies
+  if (!topTimesData[levelKey] || topTimesData[levelKey].length < 5) {
+    return true;
+  }
+  
+  // Otherwise, check if it's better than the worst time
+  const worstTime = topTimesData[levelKey][4].time;
+  return time < worstTime;
+}
+
+// Show the initials entry popup
+function showInitialsPopup(level, time, position) {
+  // Store the pending entry details
+  pendingInitialsEntry = {
+    level: level,
+    time: time,
+    position: position
+  };
+  
+  // Reset the initials input
+  currentInitials = "AAA";
+  currentInitialsPosition = 0;
+  initialsInput.value = currentInitials;
+  
+  // Focus the input field
+  setTimeout(() => initialsInput.focus(), 100);
+  
+  // Update displays
+  recordPositionDisplay.textContent = position;
+  recordTimeDisplay.textContent = time.toFixed(2);
+  selectedCharDisplay.textContent = currentInitials[0];
+  
+  // Show the popup
+  initialsPopup.classList.remove('hidden');
+}
+
+// Add a new time to the appropriate level's top times
+function addTopTime(level, time, initials) {
+  // Determine which level key to use
+  const levelKey = level > maxRegularLevels ? 'space' : `level${level}`;
+  
+  // If this level doesn't exist in the data, initialize it
+  if (!topTimesData[levelKey]) {
+    topTimesData[levelKey] = [];
+  }
+  
+  // Create a record with the time, date, character and initials
+  const newRecord = {
+    time: time,
+    date: new Date().toLocaleDateString(),
+    character: player1Character,
+    initials: initials || "AAA" // Default to AAA if no initials provided
+  };
+  
+  // Add the new time to the array
+  topTimesData[levelKey].push(newRecord);
+  
+  // Sort by time (ascending)
+  topTimesData[levelKey].sort((a, b) => a.time - b.time);
+  
+  // Keep only the top 5
+  if (topTimesData[levelKey].length > 5) {
+    topTimesData[levelKey] = topTimesData[levelKey].slice(0, 5);
+  }
+  
+  // Save to localStorage
+  saveTopTimes();
+  
+  // Return position (1-5) or 0 if not in top 5
+  const position = topTimesData[levelKey].findIndex(record => record === newRecord) + 1;
+  return position > 0 && position <= 5 ? position : 0;
+}
+
+// Update the leaderboard display
+function updateLeaderboardDisplay(levelKey = 'level1') {
+  if (!leaderboardContent) return;
+  
+  // Clear existing content
+  leaderboardContent.innerHTML = '';
+  
+  // Update active tab
+  document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector(`.leaderboard-tab[data-level="${levelKey}"]`).classList.add('active');
+  
+  // Create header
+  const header = document.createElement('div');
+  header.className = 'leaderboard-header';
+  
+  const rankHeader = document.createElement('div');
+  rankHeader.className = 'rank-header';
+  rankHeader.textContent = 'RANK';
+  
+  const timeHeader = document.createElement('div');
+  timeHeader.className = 'time-header';
+  timeHeader.textContent = 'TIME';
+  
+  const initialsHeader = document.createElement('div');
+  initialsHeader.className = 'initials-header';
+  initialsHeader.textContent = 'INITIALS';
+  
+  const characterHeader = document.createElement('div');
+  characterHeader.className = 'character-header';
+  characterHeader.textContent = 'RUNNER';
+  
+  header.appendChild(rankHeader);
+  header.appendChild(timeHeader);
+  header.appendChild(initialsHeader);
+  header.appendChild(characterHeader);
+  leaderboardContent.appendChild(header);
+  
+  // Get the times for this level
+  const times = topTimesData[levelKey] || [];
+  
+  if (times.length === 0) {
+    // No times yet
+    const noTimesMsg = document.createElement('div');
+    noTimesMsg.className = 'no-times-message';
+    noTimesMsg.textContent = 'No times recorded yet for this level. Complete a race to set a record!';
+    leaderboardContent.appendChild(noTimesMsg);
+    return;
+  }
+  
+  // Add each time to the display
+  times.forEach((record, index) => {
+    const row = document.createElement('div');
+    row.className = 'leaderboard-row';
+    
+    const rank = document.createElement('div');
+    rank.className = 'rank';
+    rank.textContent = `${index + 1}`;
+    
+    const time = document.createElement('div');
+    time.className = 'time';
+    time.textContent = `${record.time.toFixed(2)}s`;
+    
+    const initials = document.createElement('div');
+    initials.className = 'initials';
+    initials.textContent = record.initials || "---";
+    
+    const character = document.createElement('div');
+    character.className = 'character';
+    character.textContent = record.character === 'bolt' ? 'Shock' : 'Nkdman';
+    
+    row.appendChild(rank);
+    row.appendChild(time);
+    row.appendChild(initials);
+    row.appendChild(character);
+    
+    leaderboardContent.appendChild(row);
+  });
+}
+
+// Function to handle character cycling for initials entry
+function cycleCharacter(direction) {
+  // Valid characters for arcade-style initials (A-Z, 0-9, space)
+  const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+  
+  // Get the current character from the initials
+  let initialsArray = currentInitials.split('');
+  let currentChar = initialsArray[currentInitialsPosition];
+  
+  // Find the index of the current character
+  let charIndex = validChars.indexOf(currentChar);
+  
+  // Adjust index based on direction
+  if (direction === 'up') {
+    charIndex = (charIndex + 1) % validChars.length;
+  } else {
+    charIndex = (charIndex - 1 + validChars.length) % validChars.length;
+  }
+  
+  // Update the character
+  const newChar = validChars[charIndex];
+  initialsArray[currentInitialsPosition] = newChar;
+  currentInitials = initialsArray.join('');
+  
+  // Update the display
+  initialsInput.value = currentInitials;
+  selectedCharDisplay.textContent = newChar;
+}
+
+// Move to the next position in the initials input
+function moveToNextPosition() {
+  currentInitialsPosition = (currentInitialsPosition + 1) % 3;
+  selectedCharDisplay.textContent = currentInitials[currentInitialsPosition];
+}
+
+// Submit the initials
+function submitInitials() {
+  if (pendingInitialsEntry) {
+    // Add the time with the entered initials
+    addTopTime(
+      pendingInitialsEntry.level, 
+      pendingInitialsEntry.time, 
+      currentInitials
+    );
+    
+    // Hide the popup
+    initialsPopup.classList.add('hidden');
+    
+    // Update the top times display
+    updateTopTimesDisplay();
+    
+    // Clear the pending entry
+    pendingInitialsEntry = null;
+  }
+}
+
+// Function to show the leaderboard screen
+function showLeaderboard() {
+  viewingLeaderboard = true;
+  
+  // Hide other screens
+  characterSelection.style.display = 'none';
+  game.style.display = 'none';
+  postRaceScreen.style.display = 'none';
+  
+  // Show leaderboard
+  leaderboardScreen.style.display = 'flex';
+  
+  // Default to showing level 1 times
+  updateLeaderboardDisplay('level1');
+}
+
+// Function to hide the leaderboard and return to previous screen
+function hideLeaderboard() {
+  viewingLeaderboard = false;
+  leaderboardScreen.style.display = 'none';
+  
+  // Return to appropriate screen based on game state
+  if (gameState === 'post-race') {
+    postRaceScreen.style.display = 'flex';
+  } else {
+    characterSelection.style.display = 'flex';
+  }
+}
+
+// Initialize top times on game load
+initializeTopTimes();
+
+// Event listeners for leaderboard buttons
+if (viewLeaderboardBtn) {
+  viewLeaderboardBtn.addEventListener('click', showLeaderboard);
+}
+
+if (backFromLeaderboardBtn) {
+  backFromLeaderboardBtn.addEventListener('click', hideLeaderboard);
+}
+
+// Event listeners for leaderboard tabs
+if (leaderboardTabs) {
+  leaderboardTabs.addEventListener('click', (e) => {
+    if (e.target.classList.contains('leaderboard-tab')) {
+      const levelKey = e.target.dataset.level;
+      updateLeaderboardDisplay(levelKey);
+    }
+  });
+}
+
+// Event listeners for initials entry
+if (initialsInput) {
+  // Handle keyboard input
+  initialsInput.addEventListener('input', (e) => {
+    // Ensure uppercase and valid characters only
+    const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+    let value = e.target.value.toUpperCase();
+    
+    // Filter out invalid characters
+    value = value.split('').filter(char => validChars.includes(char)).join('');
+    
+    // Ensure max length of 3
+    value = value.substring(0, 3);
+    
+    // Pad with spaces if shorter than 3
+    while (value.length < 3) {
+      value += ' ';
+    }
+    
+    // Update the current initials
+    currentInitials = value;
+    e.target.value = value;
+    
+    // Update the selected character display
+    selectedCharDisplay.textContent = value[currentInitialsPosition];
+  });
+  
+  // Handle key navigation
+  initialsInput.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cycleCharacter('up');
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cycleCharacter('down');
+    } else if (e.key === 'ArrowRight' || e.key === 'Tab') {
+      e.preventDefault();
+      moveToNextPosition();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      submitInitials();
+    }
+  });
+}
+
+// Event listeners for initials selector buttons
+if (charUpBtn) {
+  charUpBtn.addEventListener('click', () => cycleCharacter('up'));
+}
+
+if (charDownBtn) {
+  charDownBtn.addEventListener('click', () => cycleCharacter('down'));
+}
+
+if (submitInitialsBtn) {
+  submitInitialsBtn.addEventListener('click', submitInitials);
+}
 
 // Replace individual buttons with a single multipurpose action button
 const actionButton = document.getElementById('actionButton');
@@ -67,6 +445,11 @@ function setupGame() {
   // Hide character selection and show game
   characterSelection.style.display = 'none';
   game.style.display = 'flex';
+  postRaceScreen.style.display = 'none';
+  leaderboardScreen.style.display = 'none';
+  
+  // Check if we should enter space mode (level 6)
+  spaceModeActive = currentLevel > maxRegularLevels;
   
   // Reset game variables
   distance1 = 0;
@@ -80,6 +463,12 @@ function setupGame() {
   buttonGrowthFactor = 1; // Reset button size
   gameState = 'countdown';
   celebrationActive = false;
+  viewingLeaderboard = false;
+  
+  // Update the level display
+  if (levelDisplay) {
+    levelDisplay.textContent = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+  }
   
   // Reset button appearance and text
   actionButton.classList.remove('button-exploding', 'button-growing', 'button-shaking');
@@ -91,20 +480,168 @@ function setupGame() {
   updateDistanceDisplay();
   timeDisplay.textContent = '0.00';
   
-  // Position racers at start line
-  document.querySelector('.racer-1').style.left = '0';
-  document.querySelector('.racer-2').style.left = '0';
+  // If in space mode, set up the special space race
+  if (spaceModeActive) {
+    setupSpaceMode();
+  } else {
+    // Regular race mode
+    // Position racers at start line
+    document.querySelector('.racer-1').style.left = '0';
+    document.querySelector('.racer-2').style.left = '0';
+  }
   
   // Hide results
   result.classList.add('hidden');
   
   // Clean up any existing celebration effects
-  document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+  document.querySelectorAll('.confetti, .firework, .celebration-text, .medal, .powerup, .alien').forEach(el => {
     el.remove();
   });
   
   // Start countdown
   startCountdown();
+}
+
+// Function to setup space mode
+function setupSpaceMode() {
+  // Change track background to space
+  document.querySelector('.racetrack').classList.add('space-track');
+  
+  // Change character sprites to flying versions if available
+  if (player1Character === 'bolt') {
+    player1Sprite.src = 'bolt-flying.gif';
+  } else {
+    player1Sprite.src = 'nkdman-flying.gif';
+  }
+  
+  // Add aliens to the track
+  spawnAliens();
+  
+  // Add power-ups to collect
+  spawnPowerUps();
+  
+  // Reset counter
+  aliensDefeated = 0;
+  powerUps = [];
+}
+
+// Function to spawn aliens
+function spawnAliens() {
+  const track = document.querySelector('.racetrack');
+  // Create 5 aliens at different distances
+  for (let i = 0; i < 5; i++) {
+    const alien = document.createElement('div');
+    alien.className = 'alien';
+    
+    // Position aliens along the track
+    const position = 20 + (i * 15); // Distribute them across the track
+    alien.style.left = `${position}%`;
+    alien.style.top = `${20 + Math.random() * 60}%`;
+    
+    // Add a data attribute for tracking
+    alien.dataset.health = 2; // Takes 2 hits to defeat
+    
+    track.appendChild(alien);
+  }
+}
+
+// Function to spawn power-ups
+function spawnPowerUps() {
+  const track = document.querySelector('.racetrack');
+  // Create 3 power-ups
+  const powerUpTypes = ['speed', 'shield', 'blaster'];
+  
+  for (let i = 0; i < 3; i++) {
+    const powerUp = document.createElement('div');
+    powerUp.className = `powerup ${powerUpTypes[i]}`;
+    
+    // Position power-ups along the track
+    const position = 30 + (i * 20); // Distribute them across the track
+    powerUp.style.left = `${position}%`;
+    powerUp.style.top = `${10 + Math.random() * 80}%`;
+    
+    // Add a data attribute for tracking type
+    powerUp.dataset.type = powerUpTypes[i];
+    
+    track.appendChild(powerUp);
+  }
+}
+
+// Function to collect a power-up
+function collectPowerUp(powerUpElement) {
+  const type = powerUpElement.dataset.type;
+  
+  // Apply power-up effect
+  switch(type) {
+    case 'speed':
+      // Temporary speed boost
+      difficultyFactor *= 1.5;
+      setTimeout(() => {
+        difficultyFactor /= 1.5;
+      }, 3000);
+      break;
+    case 'shield':
+      // Add shield visual effect to player
+      player1Sprite.classList.add('shielded');
+      setTimeout(() => {
+        player1Sprite.classList.remove('shielded');
+      }, 5000);
+      break;
+    case 'blaster':
+      // Enable blaster for shooting aliens
+      player1Sprite.classList.add('armed');
+      setTimeout(() => {
+        player1Sprite.classList.remove('armed');
+      }, 8000);
+      break;
+  }
+  
+  // Create visual feedback
+  createCelebrationText(`${type.toUpperCase()} BOOST!`, 0);
+  
+  // Remove power-up from screen
+  powerUpElement.remove();
+}
+
+// Function to shoot at aliens
+function shootAlien() {
+  if (!player1Sprite.classList.contains('armed')) return;
+  
+  // Create laser beam
+  const laser = document.createElement('div');
+  laser.className = 'laser';
+  
+  // Get player position
+  const playerPos = document.querySelector('.racer-1').getBoundingClientRect();
+  laser.style.left = `${playerPos.right}px`;
+  laser.style.top = `${playerPos.top + (playerPos.height/2)}px`;
+  
+  document.body.appendChild(laser);
+  
+  // Check for hits
+  const aliens = document.querySelectorAll('.alien');
+  aliens.forEach(alien => {
+    const alienPos = alien.getBoundingClientRect();
+    // Simple collision detection
+    if (Math.abs(alienPos.top - playerPos.top) < 40) {
+      // Hit!
+      let health = parseInt(alien.dataset.health) - 1;
+      if (health <= 0) {
+        // Defeat alien
+        alien.classList.add('defeated');
+        setTimeout(() => alien.remove(), 500);
+        aliensDefeated++;
+        createCelebrationText('ALIEN DEFEATED!', 0);
+      } else {
+        alien.dataset.health = health;
+        alien.classList.add('hit');
+        setTimeout(() => alien.classList.remove('hit'), 300);
+      }
+    }
+  });
+  
+  // Remove laser after animation
+  setTimeout(() => laser.remove(), 1000);
 }
 
 // Function to update the visual position of racers
@@ -120,6 +657,31 @@ function updateRacersPosition() {
   // Update racer positions
   document.querySelector('.racer-1').style.left = position1 + 'px';
   document.querySelector('.racer-2').style.left = position2 + 'px';
+  
+  // In space mode, check for collisions with power-ups and aliens
+  if (spaceModeActive) {
+    // Check power-up collisions
+    document.querySelectorAll('.powerup').forEach(powerUp => {
+      const powerUpRect = powerUp.getBoundingClientRect();
+      const playerRect = document.querySelector('.racer-1').getBoundingClientRect();
+      
+      // Simple collision detection
+      if (
+        playerRect.right > powerUpRect.left &&
+        playerRect.left < powerUpRect.right &&
+        playerRect.bottom > powerUpRect.top &&
+        playerRect.top < powerUpRect.bottom
+      ) {
+        collectPowerUp(powerUp);
+      }
+    });
+    
+    // Check if all aliens are defeated
+    if (aliensDefeated >= 5) {
+      // Auto-win if all aliens defeated
+      playerFinished(1);
+    }
+  }
 }
 
 // Function to update distance display
@@ -166,11 +728,19 @@ function startGame() {
   startTime = new Date();
   gameInterval = setInterval(trackTime, 10);
   
-  // Set up computer player
-  // Computer finishes between 9.72 to 10.2 seconds (realistic world-class time)
-  const computerFinishTime = Math.random() * (10.2 - 9.72) + 9.72;
+  // Set up computer player based on current level
+  // Base time is 9.72-10.2 seconds, gets 5% faster each level
+  const levelSpeedBoost = 1 - ((currentLevel - 1) * 0.05);
+  const minTime = 9.72 * levelSpeedBoost;
+  const maxTime = 10.2 * levelSpeedBoost;
+  
+  // Computer finishes between adjusted times based on level
+  const computerFinishTime = Math.random() * (maxTime - minTime) + minTime;
   const updateInterval = 50; // 50ms update interval
   const distancePerUpdate = goal / (computerFinishTime * 1000 / updateInterval);
+  
+  // Show level-adjusted time in console for debugging
+  console.log(`Level ${currentLevel} - Computer finish time: ${computerFinishTime.toFixed(2)}s`);
   
   computerRunInterval = setInterval(() => {
     if (gameActive && !player2Finished && distance2 < goal) {
@@ -192,6 +762,11 @@ actionButton.addEventListener('click', () => {
       if (gameActive && !isCountdownActive && distance1 < goal) {
         movePlayer(1);
         
+        // In space mode, also shoot if armed
+        if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+          shootAlien();
+        }
+        
         // Provide visual feedback for clicks
         actionButton.classList.add('button-clicked');
         setTimeout(() => {
@@ -212,7 +787,7 @@ actionButton.addEventListener('click', () => {
         el.remove();
       });
       
-      // After shake animation, return to character selection
+      // After shake animation, transition to post-race screen
       setTimeout(() => {
         actionButton.classList.remove('button-shaking');
         
@@ -220,21 +795,59 @@ actionButton.addEventListener('click', () => {
         if (gameInterval) clearInterval(gameInterval);
         if (computerRunInterval) clearInterval(computerRunInterval);
         
-        // Return to character selection screen
+        // Transition to post-race screen
+        showPostRaceScreen();
+      }, 500); // Wait for shake animation to finish
+      break;
+      
+    case 'post-race':
+      // Return to character selection or next level
+      if (winner === 'player1') {
+        // Player won, advance to next level
+        currentLevel++;
+        setupGame();
+      } else {
+        // Player lost, go back to character selection
         game.style.display = 'none';
+        postRaceScreen.style.display = 'none';
         characterSelection.style.display = 'flex';
         gameState = 'selection';
-        result.classList.add('hidden');
-      }, 500); // Wait for shake animation to finish
+        currentLevel = 1; // Reset to level 1
+      }
       break;
   }
 });
+
+// Continue button on post-race screen
+if (continueButton) {
+  continueButton.addEventListener('click', () => {
+    if (gameState === 'post-race') {
+      if (winner === 'player1') {
+        // Player won, advance to next level
+        currentLevel++;
+        setupGame();
+      } else {
+        // Player lost, go back to character selection
+        game.style.display = 'none';
+        postRaceScreen.style.display = 'none';
+        characterSelection.style.display = 'flex';
+        gameState = 'selection';
+        currentLevel = 1; // Reset to level 1
+      }
+    }
+  });
+}
 
 // Add touch event handling for mobile
 actionButton.addEventListener('touchstart', (e) => {
   e.preventDefault(); // Prevent double actions and zoom
   if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
     movePlayer(1);
+    
+    // In space mode, also shoot if armed
+    if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+      shootAlien();
+    }
   }
 });
 
@@ -251,18 +864,199 @@ document.addEventListener('keydown', (e) => {
       e.preventDefault(); // Prevent page scrolling
       movePlayer(1);
       
+      // In space mode, also shoot if armed
+      if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+        shootAlien();
+      }
+      
       // Provide visual feedback for spacebar presses
       actionButton.classList.add('button-clicked');
       setTimeout(() => {
         actionButton.classList.remove('button-clicked');
       }, 50);
     } else if (gameState === 'finished' && !celebrationActive) {
-      // Space to go back to character selection - simulate button click for the shake effect
+      // Space to go to post-race screen - simulate button click for the shake effect
       e.preventDefault();
       actionButton.click();
+    } else if (gameState === 'post-race') {
+      // Space to continue to next level or character selection
+      e.preventDefault();
+      if (continueButton) {
+        continueButton.click();
+      } else {
+        // Fallback if continue button doesn't exist
+        actionButton.click();
+      }
     }
   }
 });
+
+// Function to show the post-race screen
+function showPostRaceScreen() {
+  gameState = 'post-race';
+  game.style.display = 'none';
+  postRaceScreen.style.display = 'flex';
+  leaderboardScreen.style.display = 'none';
+  
+  // Update level display on post-race screen
+  document.getElementById('postRaceLevel').textContent = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+  
+  // Update times and winner
+  const playerTimeText = player1Time.toFixed(2);
+  const computerTimeText = player2Time.toFixed(2);
+  document.getElementById('playerTimeDisplay').textContent = playerTimeText;
+  document.getElementById('computerTimeDisplay').textContent = computerTimeText;
+  
+  // Calculate and display time difference
+  const timeDiff = Math.abs(player1Time - player2Time).toFixed(2);
+  document.getElementById('timeDifference').textContent = timeDiff;
+  
+  // Show winner message
+  const resultMessage = winner === 'player1' 
+    ? 'VICTORY! ADVANCE TO NEXT LEVEL' 
+    : 'DEFEAT! TRY AGAIN FROM LEVEL 1';
+  document.getElementById('postRaceResult').textContent = resultMessage;
+  
+  // If in space mode and player won, show special message
+  if (spaceModeActive && winner === 'player1') {
+    document.getElementById('postRaceResult').textContent = 'CONGRATULATIONS! YOU SAVED THE GALAXY!';
+    // Maybe add some special effects or bonus content here
+  }
+  
+  // If player won and will enter space mode next, show teaser
+  if (winner === 'player1' && currentLevel === maxRegularLevels) {
+    document.getElementById('postRaceResult').textContent += ' - PREPARE FOR SPACE MODE!';
+  }
+  
+  // Update continue button text based on win/loss
+  if (continueButton) {
+    continueButton.textContent = winner === 'player1' ? 'NEXT LEVEL' : 'BACK TO START';
+  }
+  
+  // Update level markers
+  updateLevelMarkers();
+  
+  // Add some celebratory effects
+  if (winner === 'player1') {
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => createConfetti(), i * 20);
+    }
+  }
+  
+  // If player won, check if they made the top 5 times
+  if (winner === 'player1') {
+    if (wouldQualifyForTopTimes(currentLevel, player1Time)) {
+      // Determine approximately what position they'd be in
+      const levelKey = spaceModeActive ? 'space' : `level${currentLevel}`;
+      const times = [...(topTimesData[levelKey] || []), {time: player1Time}];
+      times.sort((a, b) => a.time - b.time);
+      const position = times.findIndex(record => Math.abs(record.time - player1Time) < 0.01) + 1;
+      
+      // Prompt for initials entry
+      showInitialsPopup(currentLevel, player1Time, position);
+      
+      // Show the new record indicator
+      const newRecordIndicator = document.getElementById('newRecordIndicator');
+      if (newRecordIndicator) {
+        newRecordIndicator.style.display = 'block';
+        
+        // Hide it after a while
+        setTimeout(() => {
+          newRecordIndicator.style.display = 'none';
+        }, 5000);
+      }
+      
+      // Add a celebration text
+      setTimeout(() => {
+        createCelebrationText("NEW TOP RECORD!", 0);
+      }, 1000);
+    } else {
+      // No new record, just update the display
+      updateTopTimesDisplay();
+    }
+  } else {
+    // Player didn't win, just update the display
+    updateTopTimesDisplay();
+  }
+}
+
+// Function to update the top times display in the post-race screen
+function updateTopTimesDisplay() {
+  const topTimesContainer = document.getElementById('topTimesContainer');
+  if (!topTimesContainer) return;
+  
+  // Determine which level key to use
+  const levelKey = spaceModeActive ? 'space' : `level${currentLevel}`;
+  
+  // Get the times for this level
+  const times = topTimesData[levelKey] || [];
+  
+  // Clear existing content
+  topTimesContainer.innerHTML = '';
+  
+  // Create header
+  const header = document.createElement('div');
+  header.className = 'top-times-header';
+  header.textContent = 'TOP 5 TIMES';
+  topTimesContainer.appendChild(header);
+  
+  if (times.length === 0) {
+    // No times yet
+    const noTimesMsg = document.createElement('div');
+    noTimesMsg.className = 'no-times-message';
+    noTimesMsg.textContent = 'No previous records for this level';
+    topTimesContainer.appendChild(noTimesMsg);
+    return;
+  }
+  
+  // Create a list for the times
+  const timesList = document.createElement('div');
+  timesList.className = 'top-times-list';
+  
+  // Add each time to the list
+  times.forEach((record, index) => {
+    const timeItem = document.createElement('div');
+    timeItem.className = 'top-time-item';
+    
+    // Highlight if this is the current time
+    if (winner === 'player1' && Math.abs(record.time - player1Time) < 0.01 && record.character === player1Character) {
+      timeItem.classList.add('current-time');
+    }
+    
+    timeItem.innerHTML = `
+      <span class="time-rank">${index + 1}</span>
+      <span class="time-value">${record.time.toFixed(2)}s</span>
+      <span class="time-initials">${record.initials || "---"}</span>
+      <span class="time-date">${record.date}</span>
+    `;
+    
+    timesList.appendChild(timeItem);
+  });
+  
+  topTimesContainer.appendChild(timesList);
+}
+
+// Function to update the level progress markers
+function updateLevelMarkers() {
+  // Reset all markers
+  document.querySelectorAll('.level-marker').forEach(marker => {
+    marker.classList.remove('active', 'completed');
+  });
+  
+  // Get current active level marker
+  const activeMarker = document.querySelector(`.level-marker[data-level="${spaceModeActive ? 6 : currentLevel}"]`);
+  if (activeMarker) {
+    activeMarker.classList.add('active');
+  }
+  
+  // Mark completed levels
+  for (let i = 1; i < currentLevel; i++) {
+    const marker = document.querySelector(`.level-marker[data-level="${i}"]`);
+    if (marker) {
+      marker.classList.add('completed');
+    }
+  }
+}
 
 // Function to move players
 function movePlayer(playerNum) {
@@ -492,12 +1286,19 @@ function playCelebrationSequence() {
   
   // Celebration messages
   const messages = [
-    "GREAT RACE!",
-    "WORLD CLASS!",
+    `LEVEL ${currentLevel} COMPLETE!`,
     winner === 'player1' ? "YOU WIN!" : "COMPUTER WINS!",
     `YOUR TIME: ${playerTimeText}s`,
     `COMPUTER: ${computerTimeText}s`
   ];
+  
+  // Special messages for space mode
+  if (spaceModeActive) {
+    messages[0] = "SPACE RACE COMPLETE!";
+    if (winner === 'player1') {
+      messages.push("ALIENS DEFEATED!");
+    }
+  }
   
   // Create fireworks throughout celebration
   for (let i = 0; i < 15; i++) {
@@ -552,7 +1353,7 @@ function playCelebrationSequence() {
   setTimeout(() => {
     actionButton.style.opacity = '1';
     actionButton.disabled = false;
-    actionButton.textContent = 'CHOOSE SPRINTER';
+    actionButton.textContent = 'SEE RESULTS';
     celebrationActive = false;
     
     // Final burst of confetti when button becomes active
@@ -587,6 +1388,14 @@ function finishRace() {
     </div>
   `;
   
+  // Add level information
+  resultMessage += `
+    <div class="result-row">
+      <span class="result-label">Current level:</span>
+      <span class="result-time"><span class="level-display">${spaceModeActive ? 'SPACE' : currentLevel}</span></span>
+    </div>
+  `;
+  
   resultMessage += '</div>';
   finishTime.innerHTML = resultMessage;
   
@@ -595,3 +1404,27 @@ function finishRace() {
     playCelebrationSequence();
   }, 800);
 }
+
+// Update the CSS for the leaderboard to include the initials column
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if styles need to be updated to support initials
+  const styleElement = document.createElement('style');
+  styleElement.textContent = `
+    .leaderboard-header, .leaderboard-row {
+      grid-template-columns: 60px 1fr 1fr 1fr !important;
+    }
+    
+    .time-initials {
+      color: var(--olympic-gold);
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    @media (max-width: 600px) {
+      .leaderboard-header, .leaderboard-row {
+        grid-template-columns: 40px 1fr 1fr !important;
+      }
+    }
+  `;
+  document.head.appendChild(styleElement);
+});

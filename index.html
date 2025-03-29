@@ -21,13 +21,15 @@
       
       <div class="characterOption">
         <img src="bolt-sprite.gif" alt="Bolt" class="charPreview">
-        <button id="boltButton">Bolt</button>
+        <button id="boltButton">Shock</button>
       </div>
       
       <div class="characterOption">
         <img src="nkdman-running.gif" alt="Naked Man" class="charPreview">
         <button id="nkdmanButton">Nkdman</button>
       </div>
+      
+      <button id="viewLeaderboardBtn" class="leaderboard-button">View Records</button>
     </div>
     
     <!-- Game Screen -->
@@ -65,6 +67,108 @@
       <div id="result" class="hidden">
         <div id="winnerText"></div>
         <div id="finishTime"></div>
+      </div>
+    </div>
+    
+    <!-- Post-Race Screen -->
+    <div id="postRaceScreen">
+      <h2>RACE RESULTS</h2>
+      <div id="postRaceLevel" class="level-badge">LEVEL 1</div>
+      
+      <div class="results-container">
+        <div id="postRaceResult" class="post-race-winner">VICTORY! ADVANCE TO NEXT LEVEL</div>
+        
+        <div class="post-race-times">
+          <div class="player-time">
+            <div class="time-label">YOUR TIME</div>
+            <div class="time-value"><span id="playerTimeDisplay" class="time-display">9.89</span> s</div>
+          </div>
+          
+          <div class="vs-divider">VS</div>
+          
+          <div class="computer-time">
+            <div class="time-label">COMPUTER TIME</div>
+            <div class="time-value"><span id="computerTimeDisplay" class="time-display">9.92</span> s</div>
+          </div>
+        </div>
+        
+        <div class="time-difference">
+          <div class="difference-label">TIME DIFFERENCE</div>
+          <div class="difference-value"><span id="timeDifference" class="time-display">0.03</span> s</div>
+        </div>
+      </div>
+      
+      <div class="olympic-banner"></div>
+      
+      <!-- Top Times Display -->
+      <div id="topTimesContainer" class="top-times-container">
+        <!-- Content will be dynamically generated -->
+      </div>
+      
+      <div class="olympic-banner"></div>
+      
+      <div class="level-progress">
+        <div class="progress-title">PROGRESSION</div>
+        <div class="level-tracker">
+          <div class="level-marker" data-level="1">1</div>
+          <div class="level-marker" data-level="2">2</div>
+          <div class="level-marker" data-level="3">3</div>
+          <div class="level-marker" data-level="4">4</div>
+          <div class="level-marker" data-level="5">5</div>
+          <div class="level-marker space" data-level="6">🚀</div>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button id="continueButton" class="continue-button">NEXT LEVEL</button>
+        <button id="viewRecordsButton" class="records-button" onclick="showLeaderboard()">VIEW ALL RECORDS</button>
+      </div>
+      
+      <div id="newRecordIndicator" class="new-record-indicator" style="display: none;">NEW RECORD!</div>
+    </div>
+    
+    <!-- Leaderboard Screen -->
+    <div id="leaderboardScreen" class="leaderboard-screen">
+      <h2>CHAMPION RECORDS</h2>
+      
+      <div id="leaderboardTabs" class="leaderboard-tabs">
+        <div class="leaderboard-tab active" data-level="level1">LEVEL 1</div>
+        <div class="leaderboard-tab" data-level="level2">LEVEL 2</div>
+        <div class="leaderboard-tab" data-level="level3">LEVEL 3</div>
+        <div class="leaderboard-tab" data-level="level4">LEVEL 4</div>
+        <div class="leaderboard-tab" data-level="level5">LEVEL 5</div>
+        <div class="leaderboard-tab" data-level="space">SPACE</div>
+      </div>
+      
+      <div class="leaderboard-container">
+        <div id="leaderboardContent" class="leaderboard-content">
+          <!-- Content will be dynamically generated -->
+        </div>
+      </div>
+      
+      <button id="backFromLeaderboardBtn" class="back-button">BACK</button>
+    </div>
+    
+    <!-- Initials Entry Popup -->
+    <div id="initialsPopup" class="initials-popup hidden">
+      <div class="initials-content">
+        <h3>NEW TOP TIME!</h3>
+        <p>Enter your initials:</p>
+        <div class="initials-input-container">
+          <input type="text" id="initialsInput" class="initials-input" maxlength="3" autocomplete="off">
+          <div class="blinking-cursor"></div>
+        </div>
+        <div class="character-selector">
+          <div class="selected-char">A</div>
+          <div class="selector-arrows">
+            <button class="arrow-up" id="charUp">▲</button>
+            <button class="arrow-down" id="charDown">▼</button>
+          </div>
+        </div>
+        <div class="position-display">POSITION <span id="recordPosition">1</span></div>
+        <div class="time-display">TIME: <span id="recordTime">9.84</span>s</div>
+        <button id="submitInitials" class="submit-initials">ENTER</button>
+        <div class="input-instructions">Use keyboard or arrows to select letters</div>
       </div>
     </div>
   </div>
