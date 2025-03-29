@@ -112,149 +112,63 @@ function showInitialsPopup(level, time, position) {
     position: position
   };
   
-  // Reset the initials input
+  // Reset the initials input and display
   currentInitials = "AAA";
   currentInitialsPosition = 0;
-  initialsInput.value = currentInitials;
   
-  // Focus the input field
-  setTimeout(() => initialsInput.focus(), 100);
+  // Update the character boxes
+  updateCharacterBoxes();
+  
+  // Set the first character as active
+  setActiveCharacter(0);
   
   // Update displays
   recordPositionDisplay.textContent = position;
   recordTimeDisplay.textContent = time.toFixed(2);
-  selectedCharDisplay.textContent = currentInitials[0];
   
   // Show the popup
   initialsPopup.classList.remove('hidden');
 }
 
-// Add a new time to the appropriate level's top times
-function addTopTime(level, time, initials) {
-  // Determine which level key to use
-  const levelKey = level > maxRegularLevels ? 'space' : `level${level}`;
-  
-  // If this level doesn't exist in the data, initialize it
-  if (!topTimesData[levelKey]) {
-    topTimesData[levelKey] = [];
+// Update all character boxes with current initials
+function updateCharacterBoxes() {
+  const chars = currentInitials.split('');
+  for (let i = 0; i < 3; i++) {
+    const charBox = document.getElementById(`char${i+1}`);
+    if (charBox) {
+      charBox.textContent = chars[i] || ' ';
+    }
   }
-  
-  // Create a record with the time, date, character and initials
-  const newRecord = {
-    time: time,
-    date: new Date().toLocaleDateString(),
-    character: player1Character,
-    initials: initials || "AAA" // Default to AAA if no initials provided
-  };
-  
-  // Add the new time to the array
-  topTimesData[levelKey].push(newRecord);
-  
-  // Sort by time (ascending)
-  topTimesData[levelKey].sort((a, b) => a.time - b.time);
-  
-  // Keep only the top 5
-  if (topTimesData[levelKey].length > 5) {
-    topTimesData[levelKey] = topTimesData[levelKey].slice(0, 5);
-  }
-  
-  // Save to localStorage
-  saveTopTimes();
-  
-  // Return position (1-5) or 0 if not in top 5
-  const position = topTimesData[levelKey].findIndex(record => record === newRecord) + 1;
-  return position > 0 && position <= 5 ? position : 0;
 }
 
-// Update the leaderboard display
-function updateLeaderboardDisplay(levelKey = 'level1') {
-  if (!leaderboardContent) return;
-  
-  // Clear existing content
-  leaderboardContent.innerHTML = '';
-  
-  // Update active tab
-  document.querySelectorAll('.leaderboard-tab').forEach(tab => {
-    tab.classList.remove('active');
-  });
-  document.querySelector(`.leaderboard-tab[data-level="${levelKey}"]`).classList.add('active');
-  
-  // Create header
-  const header = document.createElement('div');
-  header.className = 'leaderboard-header';
-  
-  const rankHeader = document.createElement('div');
-  rankHeader.className = 'rank-header';
-  rankHeader.textContent = 'RANK';
-  
-  const timeHeader = document.createElement('div');
-  timeHeader.className = 'time-header';
-  timeHeader.textContent = 'TIME';
-  
-  const initialsHeader = document.createElement('div');
-  initialsHeader.className = 'initials-header';
-  initialsHeader.textContent = 'INITIALS';
-  
-  const characterHeader = document.createElement('div');
-  characterHeader.className = 'character-header';
-  characterHeader.textContent = 'RUNNER';
-  
-  header.appendChild(rankHeader);
-  header.appendChild(timeHeader);
-  header.appendChild(initialsHeader);
-  header.appendChild(characterHeader);
-  leaderboardContent.appendChild(header);
-  
-  // Get the times for this level
-  const times = topTimesData[levelKey] || [];
-  
-  if (times.length === 0) {
-    // No times yet
-    const noTimesMsg = document.createElement('div');
-    noTimesMsg.className = 'no-times-message';
-    noTimesMsg.textContent = 'No times recorded yet for this level. Complete a race to set a record!';
-    leaderboardContent.appendChild(noTimesMsg);
-    return;
+// Set the active character position with visual highlight
+function setActiveCharacter(position) {
+  // Remove active class from all characters
+  for (let i = 1; i <= 3; i++) {
+    const charBox = document.getElementById(`char${i}`);
+    if (charBox) {
+      charBox.classList.remove('active');
+    }
   }
   
-  // Add each time to the display
-  times.forEach((record, index) => {
-    const row = document.createElement('div');
-    row.className = 'leaderboard-row';
-    
-    const rank = document.createElement('div');
-    rank.className = 'rank';
-    rank.textContent = `${index + 1}`;
-    
-    const time = document.createElement('div');
-    time.className = 'time';
-    time.textContent = `${record.time.toFixed(2)}s`;
-    
-    const initials = document.createElement('div');
-    initials.className = 'initials';
-    initials.textContent = record.initials || "---";
-    
-    const character = document.createElement('div');
-    character.className = 'character';
-    character.textContent = record.character === 'bolt' ? 'Shock' : 'Nkdman';
-    
-    row.appendChild(rank);
-    row.appendChild(time);
-    row.appendChild(initials);
-    row.appendChild(character);
-    
-    leaderboardContent.appendChild(row);
-  });
+  // Add active class to current position
+  const activeBox = document.getElementById(`char${position + 1}`);
+  if (activeBox) {
+    activeBox.classList.add('active');
+  }
+  
+  // Update the current position
+  currentInitialsPosition = position;
 }
 
 // Function to handle character cycling for initials entry
-function cycleCharacter(direction) {
+function cycleCharacter(direction, position = currentInitialsPosition) {
   // Valid characters for arcade-style initials (A-Z, 0-9, space)
   const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
   
   // Get the current character from the initials
   let initialsArray = currentInitials.split('');
-  let currentChar = initialsArray[currentInitialsPosition];
+  let currentChar = initialsArray[position];
   
   // Find the index of the current character
   let charIndex = validChars.indexOf(currentChar);
@@ -268,18 +182,32 @@ function cycleCharacter(direction) {
   
   // Update the character
   const newChar = validChars[charIndex];
-  initialsArray[currentInitialsPosition] = newChar;
+  initialsArray[position] = newChar;
   currentInitials = initialsArray.join('');
   
   // Update the display
-  initialsInput.value = currentInitials;
-  selectedCharDisplay.textContent = newChar;
+  updateCharacterBoxes();
 }
 
-// Move to the next position in the initials input
-function moveToNextPosition() {
-  currentInitialsPosition = (currentInitialsPosition + 1) % 3;
-  selectedCharDisplay.textContent = currentInitials[currentInitialsPosition];
+// Set a specific character at a position
+function setCharacter(char, position = currentInitialsPosition) {
+  // Valid characters only
+  const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
+  
+  // If character is valid
+  if (validChars.includes(char)) {
+    let initialsArray = currentInitials.split('');
+    initialsArray[position] = char;
+    currentInitials = initialsArray.join('');
+    
+    // Update the display
+    updateCharacterBoxes();
+    
+    // Auto-advance to next position if not at the end
+    if (position < 2) {
+      setActiveCharacter(position + 1);
+    }
+  }
 }
 
 // Submit the initials
@@ -300,6 +228,21 @@ function submitInitials() {
     
     // Clear the pending entry
     pendingInitialsEntry = null;
+    
+    // Highlight the continue button to guide the player to the next step
+    if (continueButton) {
+      continueButton.classList.add('continue-highlight');
+      
+      // Create celebration text indicating next step
+      setTimeout(() => {
+        createCelebrationText("PROCEED TO NEXT LEVEL!", 0);
+      }, 500);
+      
+      // Pulse animation to draw attention
+      setTimeout(() => {
+        continueButton.classList.remove('continue-highlight');
+      }, 3000);
+    }
   }
 }
 
@@ -354,63 +297,71 @@ if (leaderboardTabs) {
   });
 }
 
-// Event listeners for initials entry
-if (initialsInput) {
-  // Handle keyboard input
-  initialsInput.addEventListener('input', (e) => {
-    // Ensure uppercase and valid characters only
-    const validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
-    let value = e.target.value.toUpperCase();
-    
-    // Filter out invalid characters
-    value = value.split('').filter(char => validChars.includes(char)).join('');
-    
-    // Ensure max length of 3
-    value = value.substring(0, 3);
-    
-    // Pad with spaces if shorter than 3
-    while (value.length < 3) {
-      value += ' ';
-    }
-    
-    // Update the current initials
-    currentInitials = value;
-    e.target.value = value;
-    
-    // Update the selected character display
-    selectedCharDisplay.textContent = value[currentInitialsPosition];
+// Event listeners for input
+document.addEventListener('DOMContentLoaded', function() {
+  // Add listeners for up/down buttons
+  document.querySelectorAll('.up-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const position = parseInt(button.dataset.pos);
+      cycleCharacter('up', position);
+      setActiveCharacter(position);
+    });
   });
   
-  // Handle key navigation
-  initialsInput.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      cycleCharacter('up');
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      cycleCharacter('down');
-    } else if (e.key === 'ArrowRight' || e.key === 'Tab') {
-      e.preventDefault();
-      moveToNextPosition();
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      submitInitials();
+  document.querySelectorAll('.down-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const position = parseInt(button.dataset.pos);
+      cycleCharacter('down', position);
+      setActiveCharacter(position);
+    });
+  });
+  
+  // Add listeners for character boxes (when clicked, make active)
+  document.querySelectorAll('.character-box').forEach((box, index) => {
+    box.addEventListener('click', () => {
+      setActiveCharacter(index);
+    });
+  });
+  
+  // Global keyboard listener when popup is open
+  document.addEventListener('keydown', (e) => {
+    if (initialsPopup && !initialsPopup.classList.contains('hidden')) {
+      // For letter and number keys
+      if (e.key.length === 1) {
+        const char = e.key.toUpperCase();
+        setCharacter(char);
+        e.preventDefault();
+      }
+      // Arrow keys for navigation
+      else if (e.key === 'ArrowLeft' && currentInitialsPosition > 0) {
+        setActiveCharacter(currentInitialsPosition - 1);
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowRight' && currentInitialsPosition < 2) {
+        setActiveCharacter(currentInitialsPosition + 1);
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowUp') {
+        cycleCharacter('up');
+        e.preventDefault();
+      }
+      else if (e.key === 'ArrowDown') {
+        cycleCharacter('down');
+        e.preventDefault();
+      }
+      // Enter or Space to submit
+      else if (e.key === 'Enter' || e.key === ' ') {
+        submitInitials();
+        e.preventDefault();
+      }
     }
   });
-}
-
-// Event listeners for initials selector buttons
-if (charUpBtn) {
-  charUpBtn.addEventListener('click', () => cycleCharacter('up'));
-}
-
-if (charDownBtn) {
-  charDownBtn.addEventListener('click', () => cycleCharacter('down'));
-}
-
-if (submitInitialsBtn) {
-  submitInitialsBtn.addEventListener('click', submitInitials);
-}
+  
+  // Submit button
+  if (submitInitialsBtn) {
+    submitInitialsBtn.addEventListener('click', submitInitials);
+  }
+});
 
 // Replace individual buttons with a single multipurpose action button
 const actionButton = document.getElementById('actionButton');
@@ -822,6 +773,17 @@ actionButton.addEventListener('click', () => {
 if (continueButton) {
   continueButton.addEventListener('click', () => {
     if (gameState === 'post-race') {
+      // If there's a pending initials entry, handle it with default initials
+      if (pendingInitialsEntry) {
+        addTopTime(
+          pendingInitialsEntry.level, 
+          pendingInitialsEntry.time, 
+          currentInitials || "AAA"
+        );
+        pendingInitialsEntry = null;
+        initialsPopup.classList.add('hidden');
+      }
+      
       if (winner === 'player1') {
         // Player won, advance to next level
         currentLevel++;
@@ -860,6 +822,13 @@ actionButton.addEventListener('touchend', (e) => {
 document.addEventListener('keydown', (e) => {
   // 32 is the keycode for spacebar
   if (e.keyCode === 32) {
+    // If the initials popup is visible, submit on spacebar
+    if (!initialsPopup.classList.contains('hidden')) {
+      e.preventDefault();
+      submitInitials();
+      return;
+    }
+    
     if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
       e.preventDefault(); // Prevent page scrolling
       movePlayer(1);
@@ -943,6 +912,9 @@ function showPostRaceScreen() {
     }
   }
   
+  // First update the top times display without the new record
+  updateTopTimesDisplay();
+  
   // If player won, check if they made the top 5 times
   if (winner === 'player1') {
     if (wouldQualifyForTopTimes(currentLevel, player1Time)) {
@@ -951,9 +923,6 @@ function showPostRaceScreen() {
       const times = [...(topTimesData[levelKey] || []), {time: player1Time}];
       times.sort((a, b) => a.time - b.time);
       const position = times.findIndex(record => Math.abs(record.time - player1Time) < 0.01) + 1;
-      
-      // Prompt for initials entry
-      showInitialsPopup(currentLevel, player1Time, position);
       
       // Show the new record indicator
       const newRecordIndicator = document.getElementById('newRecordIndicator');
@@ -970,13 +939,12 @@ function showPostRaceScreen() {
       setTimeout(() => {
         createCelebrationText("NEW TOP RECORD!", 0);
       }, 1000);
-    } else {
-      // No new record, just update the display
-      updateTopTimesDisplay();
+      
+      // Show the initials popup after a delay to allow player to see results first
+      setTimeout(() => {
+        showInitialsPopup(currentLevel, player1Time, position);
+      }, 1500);
     }
-  } else {
-    // Player didn't win, just update the display
-    updateTopTimesDisplay();
   }
 }
 
@@ -1428,3 +1396,121 @@ document.addEventListener('DOMContentLoaded', function() {
   `;
   document.head.appendChild(styleElement);
 });
+
+// Add a new time to the appropriate level's top times
+function addTopTime(level, time, initials) {
+  // Determine which level key to use
+  const levelKey = level > maxRegularLevels ? 'space' : `level${level}`;
+  
+  // If this level doesn't exist in the data, initialize it
+  if (!topTimesData[levelKey]) {
+    topTimesData[levelKey] = [];
+  }
+  
+  // Create a record with the time, date, character and initials
+  const newRecord = {
+    time: time,
+    date: new Date().toLocaleDateString(),
+    character: player1Character,
+    initials: initials || "AAA" // Default to AAA if no initials provided
+  };
+  
+  // Add the new time to the array
+  topTimesData[levelKey].push(newRecord);
+  
+  // Sort by time (ascending)
+  topTimesData[levelKey].sort((a, b) => a.time - b.time);
+  
+  // Keep only the top 5
+  if (topTimesData[levelKey].length > 5) {
+    topTimesData[levelKey] = topTimesData[levelKey].slice(0, 5);
+  }
+  
+  // Save to localStorage
+  saveTopTimes();
+  
+  // Return position (1-5) or 0 if not in top 5
+  const position = topTimesData[levelKey].findIndex(record => record === newRecord) + 1;
+  return position > 0 && position <= 5 ? position : 0;
+}
+
+// Update the leaderboard display
+function updateLeaderboardDisplay(levelKey = 'level1') {
+  if (!leaderboardContent) return;
+  
+  // Clear existing content
+  leaderboardContent.innerHTML = '';
+  
+  // Update active tab
+  document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  document.querySelector(`.leaderboard-tab[data-level="${levelKey}"]`).classList.add('active');
+  
+  // Create header
+  const header = document.createElement('div');
+  header.className = 'leaderboard-header';
+  
+  const rankHeader = document.createElement('div');
+  rankHeader.className = 'rank-header';
+  rankHeader.textContent = 'RANK';
+  
+  const timeHeader = document.createElement('div');
+  timeHeader.className = 'time-header';
+  timeHeader.textContent = 'TIME';
+  
+  const initialsHeader = document.createElement('div');
+  initialsHeader.className = 'initials-header';
+  initialsHeader.textContent = 'INITIALS';
+  
+  const characterHeader = document.createElement('div');
+  characterHeader.className = 'character-header';
+  characterHeader.textContent = 'RUNNER';
+  
+  header.appendChild(rankHeader);
+  header.appendChild(timeHeader);
+  header.appendChild(initialsHeader);
+  header.appendChild(characterHeader);
+  leaderboardContent.appendChild(header);
+  
+  // Get the times for this level
+  const times = topTimesData[levelKey] || [];
+  
+  if (times.length === 0) {
+    // No times yet
+    const noTimesMsg = document.createElement('div');
+    noTimesMsg.className = 'no-times-message';
+    noTimesMsg.textContent = 'No times recorded yet for this level. Complete a race to set a record!';
+    leaderboardContent.appendChild(noTimesMsg);
+    return;
+  }
+  
+  // Add each time to the display
+  times.forEach((record, index) => {
+    const row = document.createElement('div');
+    row.className = 'leaderboard-row';
+    
+    const rank = document.createElement('div');
+    rank.className = 'rank';
+    rank.textContent = `${index + 1}`;
+    
+    const time = document.createElement('div');
+    time.className = 'time';
+    time.textContent = `${record.time.toFixed(2)}s`;
+    
+    const initials = document.createElement('div');
+    initials.className = 'initials';
+    initials.textContent = record.initials || "---";
+    
+    const character = document.createElement('div');
+    character.className = 'character';
+    character.textContent = record.character === 'bolt' ? 'Shock' : 'Nkdman';
+    
+    row.appendChild(rank);
+    row.appendChild(time);
+    row.appendChild(initials);
+    row.appendChild(character);
+    
+    leaderboardContent.appendChild(row);
+  });
+}

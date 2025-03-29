@@ -155,20 +155,28 @@
         <h3>NEW TOP TIME!</h3>
         <p>Enter your initials:</p>
         <div class="initials-input-container">
-          <input type="text" id="initialsInput" class="initials-input" maxlength="3" autocomplete="off">
-          <div class="blinking-cursor"></div>
+          <div class="character-box" id="char1">A</div>
+          <div class="character-box" id="char2">A</div>
+          <div class="character-box" id="char3">A</div>
         </div>
-        <div class="character-selector">
-          <div class="selected-char">A</div>
-          <div class="selector-arrows">
-            <button class="arrow-up" id="charUp">▲</button>
-            <button class="arrow-down" id="charDown">▼</button>
+        <div class="character-controls">
+          <div class="control-column">
+            <button class="nav-button up-button" data-pos="0">▲</button>
+            <button class="nav-button down-button" data-pos="0">▼</button>
+          </div>
+          <div class="control-column">
+            <button class="nav-button up-button" data-pos="1">▲</button>
+            <button class="nav-button down-button" data-pos="1">▼</button>
+          </div>
+          <div class="control-column">
+            <button class="nav-button up-button" data-pos="2">▲</button>
+            <button class="nav-button down-button" data-pos="2">▼</button>
           </div>
         </div>
         <div class="position-display">POSITION <span id="recordPosition">1</span></div>
         <div class="time-display">TIME: <span id="recordTime">9.84</span>s</div>
-        <button id="submitInitials" class="submit-initials">ENTER</button>
-        <div class="input-instructions">Use keyboard or arrows to select letters</div>
+        <button id="submitInitials" class="submit-initials">SUBMIT RECORD</button>
+        <div class="input-instructions">Use ↑/↓ buttons to change letters or<br>press letter keys A-Z, 0-9 to type directly</div>
       </div>
     </div>
   </div>

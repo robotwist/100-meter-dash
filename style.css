@@ -1047,6 +1047,25 @@ p {
   background: linear-gradient(to bottom, #b00000, #900000);
 }
 
+.continue-highlight {
+  animation: pulseButtonHighlight 1.5s infinite !important;
+  transform: scale(1.05);
+  box-shadow: 0px 8px 0px #800000, 0 0 25px rgba(255, 0, 0, 1) !important;
+  background: linear-gradient(to bottom, #ff0022, #d10000);
+}
+
+@keyframes pulseButtonHighlight {
+  0% {
+    box-shadow: 0px 8px 0px #800000, 0 0 15px rgba(193, 0, 29, 0.8);
+  }
+  50% {
+    box-shadow: 0px 8px 0px #800000, 0 0 30px rgba(255, 0, 0, 1);
+  }
+  100% {
+    box-shadow: 0px 8px 0px #800000, 0 0 15px rgba(193, 0, 29, 0.8);
+  }
+}
+
 /* Level Badge */
 .level-badge {
   background-color: var(--olympic-blue);
@@ -1679,98 +1698,82 @@ p {
 }
 
 .initials-input-container {
-  display: inline-flex;
-  position: relative;
-  margin: 10px auto 25px;
-  padding: 5px;
-  background: black;
-  border: 2px solid var(--olympic-blue);
-  border-radius: 5px;
-}
-
-.initials-input {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 36px;
-  width: 120px;
-  height: 50px;
-  text-align: center;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 10px;
-  padding-left: 10px;
-  caret-color: transparent;
-  outline: none;
-}
-
-.blinking-cursor {
-  position: absolute;
-  right: 15px;
-  top: 10px;
-  width: 3px;
-  height: 36px;
-  background-color: white;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-
-.character-selector {
   display: flex;
   justify-content: center;
-  align-items: center;
-  margin-bottom: 25px;
-  gap: 15px;
+  gap: 12px;
+  margin: 0 auto 25px;
 }
 
-.selected-char {
-  font-size: 42px;
+.character-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 60px;
-  height: 60px;
-  background-color: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px solid var(--olympic-blue);
-  border-radius: 5px;
+  height: 80px;
+  background-color: rgba(0, 0, 0, 0.5);
   color: white;
+  font-size: 42px;
   font-weight: bold;
+  font-family: 'Courier New', monospace;
+  border: 2px solid var(--olympic-blue);
+  border-radius: 8px;
+  user-select: none;
   text-transform: uppercase;
+  transition: all 0.15s ease;
+  box-shadow: 0 0 8px var(--blue-glow);
 }
 
-.selector-arrows {
+.character-box.active {
+  background-color: rgba(0, 80, 255, 0.2);
+  border-color: var(--olympic-gold);
+  box-shadow: 0 0 15px var(--gold-glow);
+  transform: scale(1.1);
+}
+
+.character-controls {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 25px;
+}
+
+.control-column {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  width: 60px;
 }
 
-.arrow-up, .arrow-down {
-  background-color: var(--olympic-blue);
+.nav-button {
+  height: 35px;
+  background-color: rgba(0, 60, 150, 0.8);
   color: white;
   border: none;
-  width: 40px;
-  height: 25px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 3px;
-  transition: all 0.1s;
+  transition: all 0.15s ease;
 }
 
-.arrow-up:hover, .arrow-down:hover {
-  background-color: #0060c0;
+.nav-button:hover {
+  background-color: rgba(0, 80, 200, 1);
+  transform: scale(1.05);
 }
 
-.arrow-up:active, .arrow-down:active {
-  background-color: #004080;
+.nav-button:active {
+  background-color: rgba(0, 40, 100, 1);
   transform: scale(0.95);
+}
+
+.up-button {
+  box-shadow: 0 2px 0 rgba(0, 100, 255, 0.5);
+}
+
+.down-button {
+  box-shadow: 0 2px 0 rgba(0, 40, 100, 0.5);
 }
 
 .position-display, .time-display {
@@ -1790,7 +1793,7 @@ p {
 }
 
 .submit-initials {
-  padding: 12px 24px;
+  padding: 16px 32px;
   font-size: 18px;
   background: linear-gradient(to bottom, #e30022, var(--olympic-red));
   color: white;
@@ -1804,7 +1807,7 @@ p {
   font-family: 'Courier New', monospace;
   letter-spacing: 1px;
   border-radius: 10px;
-  width: 150px;
+  min-width: 220px;
 }
 
 .submit-initials:hover {
@@ -1822,8 +1825,8 @@ p {
 .input-instructions {
   color: #bbbbbb;
   font-size: 14px;
-  margin-top: 10px;
-  font-style: italic;
+  margin-top: 15px;
+  line-height: 1.5;
 }
 
 /* Mobile adjustments for initials entry */
@@ -1836,19 +1839,22 @@ p {
     font-size: 20px;
   }
   
-  .initials-input {
-    font-size: 32px;
-    width: 100px;
-    height: 45px;
+  .character-box {
+    width: 50px;
+    height: 70px;
+    font-size: 36px;
   }
   
-  .blinking-cursor {
+  .control-column {
+    width: 50px;
+  }
+  
+  .nav-button {
     height: 32px;
   }
   
-  .selected-char {
-    font-size: 36px;
-    width: 50px;
-    height: 50px;
+  .submit-initials {
+    font-size: 16px;
+    padding: 14px 28px;
   }
 }
