@@ -1,113 +1,674 @@
+/* F1 Track & Field Racing Theme - blending Hayward Field and F1 aesthetics */
+
+:root {
+  --track-color: #e25822; /* Track terracotta color */
+  --f1-blue: #00225a;
+  --f1-red: #e10600;
+  --track-lane: #9c3518;
+  --track-marking: #ffffff;
+  --timing-color: #ff0000;
+  --winner-color: #1dd100;
+  --background-gradient: linear-gradient(to bottom, #004e92, #001f35);
+  --button-scale: 1; /* New variable for button scaling */
+}
 
 body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
-  background-color: #a6e0c3;
-  font-family: Arial, sans-serif;
+  background: var(--background-gradient);
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  color: white;
 }
 
-#game {
+#gameContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #79c8ce;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 300px;
   width: 100%;
-  text-align: center;
+  max-width: 800px;
 }
 
 h1 {
-  font-size: 36px;
-  color: #567;
+  font-size: 42px;
+  color: white;
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
-p {
-  font-size: 18px;
-  margin: 10px 0;
-  color: #678;
+h1::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 10%;
+  width: 80%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 25px,
+    var(--track-marking) 25px,
+    var(--track-marking) 50px
+  );
 }
 
-/* Styling for the run button */
-#runButton {
-  padding: 12px 24px;
+h2 {
+  font-size: 24px;
+  color: white;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Countdown styles */
+.countdown-display {
+  font-size: 48px;
+  font-weight: bold;
+  color: var(--f1-red);
+  text-align: center;
+  margin: 20px 0;
+  height: 60px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+
+/* Menu Panels */
+#modeSelection, #characterSelection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 2px solid var(--f1-blue);
+  position: relative;
+  overflow: hidden;
+}
+
+#modeSelection::before, #characterSelection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right, var(--f1-red), var(--track-color));
+}
+
+/* Buttons styling */
+#modeSelection button, #characterSelection button, #restartButton {
+  padding: 14px 28px;
   font-size: 18px;
-  background-color: #007bff;
+  background-color: var(--f1-blue);
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  margin-bottom: 15px;
-  transition: background-color 0.3s ease;
-}
-
-#runButton:hover {
-  background-color: #0056b3;
-}
-
-#runButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-/* Flexbox for progress bar */
-#progress {
-  height: 20px;
-  width: 100%;
-  background-color: lightgray;
-  border-radius: 5px;
+  margin: 10px;
+  transition: all 0.3s ease;
+  position: relative;
   overflow: hidden;
-  margin-top: 15px;
+  text-transform: uppercase;
+  font-weight: bold;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-#progressBar {
+#modeSelection button:hover, #characterSelection button:hover, #restartButton:hover {
+  background-color: var(--f1-red);
+  transform: translateY(-3px);
+}
+
+#modeSelection button:active, #characterSelection button:active, #restartButton:active {
+  transform: translateY(0);
+}
+
+.characterOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 30px;
+  transition: transform 0.3s ease;
+}
+
+.characterOption:hover {
+  transform: scale(1.05);
+}
+
+.charPreview {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.characterOption:hover .charPreview {
+  border-color: var(--f1-red);
+}
+
+/* Game area styling */
+#game {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 34, 90, 0.9);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+#game::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect x="0" y="0" width="10" height="10" fill="white" opacity="0.05"/><rect x="10" y="10" width="10" height="10" fill="white" opacity="0.05"/></svg>');
+  border-radius: 15px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* Track styling */
+#trackContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 25px;
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+  border-left: 5px solid var(--f1-red);
+}
+
+.runner {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.runner::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  filter: blur(2px);
+  z-index: -1;
+}
+
+.runner img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
+}
+
+.progressTrack {
+  height: 30px;
+  width: 100%;
+  background-color: var(--track-color);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid #6e2b15;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.progressTrack::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    90deg, 
+    transparent, 
+    transparent 10px, 
+    rgba(255, 255, 255, 0.1) 10px, 
+    rgba(255, 255, 255, 0.1) 20px
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.progressBar {
   height: 100%;
   width: 0%;
-  background-color: #28a745;
+  background-color: var(--f1-blue);
   transition: width 0.3s ease;
+  position: relative;
+  z-index: 0;
 }
 
-/* Styling the time elapsed */
-#timeElapsed {
+.progressBar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 5px;
+  background-color: white;
+}
+
+/* Controls styling */
+#controls {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: 20px 0;
+}
+
+#player1Controls, #player2Controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  min-width: 200px;
+}
+
+/* Enhanced Run Button Styling */
+#runButton1 {
+  padding: 16px 32px;
+  font-size: 22px;
+  background-color: var(--f1-red);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.15s ease, transform 0.3s ease;
+  text-transform: uppercase;
   font-weight: bold;
-  color: #ff4757;
+  box-shadow: 
+    0px 8px 0px #b30500,
+    0px 12px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  top: 0;
+  min-width: 160px;
+  letter-spacing: 2px;
+  -webkit-tap-highlight-color: transparent;
+  transform: perspective(1px) translateZ(0) scale(var(--button-scale));
+  user-select: none;
+  transform-origin: center;
+}
+
+#runButton1:hover {
+  background-color: #ff2a00;
+  transform: translateY(-2px);
+  box-shadow: 
+    0px 10px 0px #b30500,
+    0px 14px 12px rgba(0, 0, 0, 0.3);
+}
+
+#runButton1:active {
+  transform: translateY(5px);
+  top: 4px;
+  box-shadow: 
+    0px 3px 0px #b30500,
+    0px 5px 5px rgba(0, 0, 0, 0.3);
+  background-color: #fd0000;
+}
+
+#runButton1:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+  transform: translateY(0);
+  top: 0;
+  box-shadow: 
+    0px 4px 0px #707070,
+    0px 6px 5px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
+}
+
+/* Button press animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+#runButton1:not(:disabled):active {
+  animation: pulse 0.2s linear;
+}
+
+/* Button explosion animation */
+@keyframes explode {
+  0% { transform: scale(1.5); opacity: 1; }
+  20% { transform: scale(2); box-shadow: 0 0 30px 10px #ffdd00; background-color: #ffdd00; }
+  50% { transform: scale(2.5); filter: hue-rotate(180deg); }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.button-exploding {
+  animation: explode 0.8s forwards;
+  pointer-events: none !important;
+  box-shadow: 0 0 50px 15px rgba(255, 255, 0, 0.8) !important;
+}
+
+.button-growing {
+  background-color: var(--f1-red) !important;
+  box-shadow: 
+    0px 8px 0px #b30500,
+    0px 12px 10px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(255, 0, 0, 0.5) !important;
+}
+
+p {
+  font-size: 16px;
+  margin: 10px 0;
+  color: white;
+}
+
+#controlInstruction {
+  font-weight: bold;
+  color: #ff9d00;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+#timeElapsed {
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  color: var(--timing-color);
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 5px 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+/* Race results styling */
+#result {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  border: 2px solid var(--winner-color);
+  width: 80%;
+  max-width: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+#result::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right, var(--f1-blue), var(--winner-color));
+}
+
+#winnerText {
+  color: var(--winner-color);
+  margin-bottom: 15px;
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(29, 209, 0, 0.5);
+}
+
+#finishTime {
+  font-size: 18px;
+  line-height: 1.8;
+  display: block;
+  margin: 15px 0;
+  color: white;
+  font-family: 'Courier New', monospace;
+}
+
+.time-display {
+  font-weight: bold;
+  color: var(--timing-color);
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin: 0 5px;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+}
+
+.time-results {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.result-row:last-child {
+  border-bottom: none;
+}
+
+.result-label {
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #bbbbbb;
+}
+
+.result-time {
+  display: flex;
+  align-items: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#characterSelection {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Checkered flag pattern for finish */
+.track::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  right: 10px;
+  width: 20px;
+  height: 80%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect x="0" y="0" width="10" height="10" fill="white"/><rect x="10" y="10" width="10" height="10" fill="white"/></svg>');
+  background-repeat: repeat;
+  opacity: 0.7;
 }
 
 /* Mobile responsive adjustments */
-@media (max-width: 480px) {
-  #game {
-    width: 90%;
-  }
-
+@media (max-width: 600px) {
   h1 {
-    font-size: 20px;
-  }
-
-  #runButton {
-    font-size: 16px;
-    padding: 10px 20px;
-  }
-  #runner {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 15px;
-    position: relative;
+    font-size: 28px;
   }
   
-  #runner img {
-    width: 80%;
-    height: 80%;
+  .countdown-display {
+    font-size: 36px;
   }
   
   #characterSelection {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
+    flex-direction: column;
+  }
+  
+  #controls {
+    flex-direction: column;
+  }
+  
+  #player1Controls, #player2Controls {
+    margin-bottom: 15px;
+    width: 90%;
+  }
+  
+  .runner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  /* Mobile-specific button enhancements */
+  #runButton1 {
+    padding: 18px 30px;
+    width: 85%;
+    min-height: 70px;
+    font-size: 24px;
+    margin: 15px auto;
+    box-shadow: 
+      0px 8px 0px #b30500,
+      0px 12px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  #runButton1:active {
+    transform: translateY(5px);
+    box-shadow: 
+      0px 3px 0px #b30500,
+      0px 5px 5px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Increase padding to make button easier to tap */
+  #player1Controls {
+    padding: 20px 15px 25px;
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Remove hover effects on touch devices */
+  #runButton1:hover {
+    transform: translateY(0);
+    box-shadow: 
+      0px 8px 0px #b30500,
+      0px 12px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .track {
+    padding: 10px;
+  }
+  
+  .progressTrack {
+    height: 20px;
+  }
+  
+  #gameContainer {
+    padding: 10px 5px;
+  }
+  
+  #modeSelection button, #characterSelection button, #restartButton {
+    min-height: 50px;
+    margin: 8px;
+    width: 80%;
+  }
+  
+  #result {
+    width: 95%;
+    padding: 15px;
+    margin-top: 20px;
+  }
+  
+  .result-row {
+    padding: 6px 0;
+  }
+  
+  .time-display {
+    font-size: 18px;
+  }
+  
+  #winnerText {
+    font-size: 22px;
+  }
+  
+  body {
+    overscroll-behavior: contain;
+  }
+}
+
+/* Orientation handling */
+@media (max-height: 500px) and (orientation: landscape) {
+  #gameContainer {
+    padding: 5px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  h1::after {
+    bottom: -5px;
+  }
+  
+  .countdown-display {
+    margin: 10px 0;
+    height: 40px;
+  }
+  
+  #trackContainer {
+    margin-bottom: 10px;
+  }
+  
+  .track {
+    margin-bottom: 15px;
+  }
+  
+  #controls {
+    margin: 10px 0;
+  }
+  
+  #player1Controls, #player2Controls {
+    padding: 8px;
+  }
+}
+
+/* High DPI screens (Retina displays) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .progressTrack, .track, #result {
+    border-width: 1px;
   }
 }
