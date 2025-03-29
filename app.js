@@ -15,7 +15,8 @@ let player1Finished = false;
 let player2Finished = false;
 let player1Time = 0;
 let player2Time = 0;
-let buttonGrowthFactor = 1; // New variable for button size
+let buttonGrowthFactor = 1; // Variable for button size
+let isMobileDevice = false; // Flag for detecting mobile devices
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -37,6 +38,19 @@ const winnerText = document.getElementById('winnerText');
 const finishTime = document.getElementById('finishTime');
 const restartButton = document.getElementById('restartButton');
 const countdownDisplay = document.getElementById('countdown');
+
+// Detect if we're on a mobile device
+function detectMobileDevice() {
+  isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  // Update instruction text based on device
+  if (!isMobileDevice) {
+    runButton1.setAttribute('data-tooltip', 'Or press SPACEBAR to run!');
+  }
+}
+
+// Call detection on load
+detectMobileDevice();
 
 // Character selection
 boltButton.addEventListener('click', () => {
@@ -87,6 +101,13 @@ function setupGame() {
   // Disable buttons during countdown
   runButton1.disabled = true;
   
+  // Update control instructions based on device
+  if (!isMobileDevice) {
+    controlInstruction.textContent = 'Press SPACEBAR or click RUN button repeatedly!';
+  } else {
+    controlInstruction.textContent = 'Tap RUN button repeatedly!';
+  }
+  
   // Start countdown
   startCountdown();
 }
@@ -128,7 +149,6 @@ function startGame() {
   gameInterval = setInterval(trackTime, 10);
   
   // Set up computer player
-  controlInstruction.textContent = 'Computer Runner';
   // Computer finishes between 9.3 to 9.7 seconds
   const computerFinishTime = Math.random() * (9.7 - 9.3) + 9.3;
   const updateInterval = 50; // 50ms update interval
@@ -151,6 +171,12 @@ function startGame() {
 runButton1.addEventListener('click', () => {
   if (gameActive && !isCountdownActive && distance1 < goal) {
     movePlayer(1);
+    
+    // Provide visual feedback for clicks
+    runButton1.classList.add('button-clicked');
+    setTimeout(() => {
+      runButton1.classList.remove('button-clicked');
+    }, 50);
   }
 });
 
@@ -165,6 +191,21 @@ runButton1.addEventListener('touchstart', (e) => {
 // Prevent default on touchend to avoid issues
 runButton1.addEventListener('touchend', (e) => {
   e.preventDefault();
+});
+
+// Add keyboard support for spacebar
+document.addEventListener('keydown', (e) => {
+  // 32 is the keycode for spacebar
+  if (e.keyCode === 32 && gameActive && !isCountdownActive && distance1 < goal) {
+    e.preventDefault(); // Prevent page scrolling
+    movePlayer(1);
+    
+    // Provide visual feedback for spacebar presses
+    runButton1.classList.add('button-clicked');
+    setTimeout(() => {
+      runButton1.classList.remove('button-clicked');
+    }, 50);
+  }
 });
 
 // Function to move players

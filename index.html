@@ -3,25 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00225a">
+  <meta name="theme-color" content="#000080">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>100 Meter Dash Race</title>
+  <title>World Class 100 Meter Mash</title>
+  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/itc-benguiat-std" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="gameContainer">
-    <h1>100 Meter Dash Race!</h1>
+    <div class="title-container">
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <div class="star"></div>
+      <h1>World Class 100 Meter Mash</h1>
+    </div>
+    <div class="title-underline"></div>
+    <div class="pixel-text subtitle">Are you Olympic Class?</div>
     
     <div id="characterSelection">
-      <h2>Choose Your Runner:</h2>
+      <h2>Select Your Champion:</h2>
       <div class="characterOption">
         <img src="bolt-sprite.gif" alt="Bolt" class="charPreview">
-        <button id="boltButton">Usain Bolt</button>
+        <button id="boltButton" class="pixel-text">Inzan Fire</button>
       </div>
       <div class="characterOption">
         <img src="nkdman-running.gif" alt="Nkdman" class="charPreview">
-        <button id="nkdmanButton">Nkdman</button>
+        <button id="nkdmanButton" class="pixel-text">Nkdman</button>
       </div>
     </div>
     
@@ -51,21 +62,26 @@
       <div id="controls">
         <div id="player1Controls">
           <p>Your Progress: <span id="distance1">0.0</span> meters</p>
-          <button id="runButton1">RUN!</button>
+          <button id="runButton1" class="pixel-text">MASH!</button>
+          <p class="control-info">
+            <span class="mobile-only">TAP fast to sprint!</span>
+            <span class="desktop-only">CLICK or SPACE fast!</span>
+          </p>
         </div>
         
         <div id="player2Controls">
           <p>Computer: <span id="distance2">0.0</span> meters</p>
-          <p id="controlInstruction">Computer Runner</p>
+          <p id="controlInstruction" class="pixel-text">Computer Runner</p>
         </div>
       </div>
       
       <p>Time elapsed: <span id="timeElapsed">0.00</span> seconds</p>
       
       <div id="result" class="hidden">
-        <h2 id="winnerText"></h2>
+        <div class="olympic-banner"></div>
+        <h2 id="winnerText" class="pixel-text"></h2>
         <div id="finishTime"></div>
-        <button id="restartButton">Race Again</button>
+        <button id="restartButton" class="pixel-text">Race Again</button>
       </div>
     </div>
   </div>
