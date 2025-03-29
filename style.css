@@ -1,11 +1,11 @@
 /* Functional 1984 Olympics & NES Track & Field Theme */
 
 :root {
-  --olympic-blue: #004080;
-  --olympic-red: #e4002b;
-  --olympic-gold: #ffd700;
+  --olympic-blue: #00336e; /* Deeper blue */
+  --olympic-red: #c1001d; /* Deeper red */
+  --olympic-white: #ffffff;
   --olympic-silver: #c0c0c0;
-  --nes-dark-blue: #000080;
+  --nes-dark-blue: #000060; /* Deeper dark blue */
   --nes-black: #0f0f0f;
   --background-gradient: linear-gradient(to bottom, var(--olympic-blue), #001038);
   --button-scale: 1; /* Variable for button scaling */
@@ -13,9 +13,11 @@
   --container-radius: 12px; /* Unified border radius */
   --button-radius: 8px; /* Button border radius */
   --glow-color: rgba(255, 255, 255, 0.2); /* Base glow color */
-  --blue-glow: rgba(0, 64, 128, 0.3); /* Blue glow color */
-  --red-glow: rgba(228, 0, 43, 0.3); /* Red glow color */
-  --gold-glow: rgba(255, 215, 0, 0.3); /* Gold glow color */
+  --blue-glow: rgba(0, 51, 110, 0.5); /* Enhanced blue glow */
+  --red-glow: rgba(193, 0, 29, 0.5); /* Enhanced red glow */
+  --white-glow: rgba(255, 255, 255, 0.5); /* White glow instead of gold */
+  --track-length: 100%; /* Track length as percentage of screen width */
+  --race-speed-multiplier: 1.8; /* To adjust the race timing */
 }
 
 /* Pulsing glow animation */
@@ -25,16 +27,56 @@
   100% { box-shadow: 0 0 5px 2px var(--glow-color); }
 }
 
+/* White pulsing glow animation for button */
+@keyframes pulseWhiteGlow {
+  0% { box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4), 0 0 5px 2px var(--white-glow); }
+  50% { box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4), 0 0 15px 7px var(--white-glow); }
+  100% { box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4), 0 0 5px 2px var(--white-glow); }
+}
+
+/* Button shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0) scale(var(--button-scale)); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px) scale(var(--button-scale)); }
+  20%, 40%, 60%, 80% { transform: translateX(5px) scale(var(--button-scale)); }
+}
+
+/* Button grow animation for victory preparation */
+@keyframes growButton {
+  0% { transform: scale(var(--button-scale)); }
+  50% { transform: scale(calc(var(--button-scale) * 1.15)); }
+  100% { transform: scale(var(--button-scale)); }
+}
+
+/* Confetti animation */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(calc(100vh - 100px)) rotate(720deg); opacity: 0; }
+}
+
+@keyframes confetti-sway {
+  0% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  100% { transform: translateX(-5px); }
+}
+
+/* Firework animation */
+@keyframes firework-explode {
+  0% { transform: translate(-50%, -50%) scale(0.01); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+}
+
 /* Blue area texture */
 .blue-texture {
   background-image: 
-    linear-gradient(135deg, rgba(0, 40, 100, 0.8) 0%, rgba(0, 20, 80, 0.9) 100%),
+    linear-gradient(135deg, rgba(0, 40, 100, 0.9) 0%, rgba(0, 20, 80, 1) 100%),
     repeating-linear-gradient(
       45deg,
       transparent,
       transparent 10px,
-      rgba(0, 0, 40, 0.1) 10px,
-      rgba(0, 0, 40, 0.1) 20px
+      rgba(0, 0, 40, 0.2) 10px,
+      rgba(0, 0, 40, 0.2) 20px
     );
 }
 
@@ -44,7 +86,7 @@ body {
   align-items: center;
   min-height: 100vh;
   margin: 0;
-  background: linear-gradient(135deg, var(--nes-dark-blue) 0%, #00072c 100%);
+  background: linear-gradient(135deg, var(--nes-dark-blue) 0%, #000030 100%);
   font-family: 'Arial', sans-serif;
   padding: 20px;
   color: white;
@@ -56,24 +98,24 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
 }
 
 /* Title - RED WHITE BLUE Olympic theme */
 .title-container {
   width: 100%;
-  background: linear-gradient(to bottom, #000060, #000040);
+  background: linear-gradient(to bottom, #000050, #000030);
   background-image: linear-gradient(
     to bottom,
-    #000060,
-    #000040
+    #000050,
+    #000030
   ), 
   repeating-linear-gradient(
     45deg,
     transparent,
     transparent 5px,
-    rgba(0, 0, 60, 0.2) 5px,
-    rgba(0, 0, 60, 0.2) 10px
+    rgba(0, 0, 60, 0.3) 5px,
+    rgba(0, 0, 60, 0.3) 10px
   );
   padding: 15px 0;
   border: 3px solid white;
@@ -89,12 +131,12 @@ h1 {
   font-size: 36px;
   background: linear-gradient(
     to bottom,
-    #ff0000 0%,
-    #ff0000 33%, 
-    #ffffff 33%,
+    #c1001d 0%,   /* Deeper red */
+    #c1001d 33%, 
+    #ffffff 33%,  /* Pure white */
     #ffffff 67%,
-    #0000ff 67%,
-    #0000ff 100%
+    #00336e 67%,  /* Deeper blue */
+    #00336e 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -138,7 +180,7 @@ h2 {
   text-align: center;
   margin: 15px 0;
   height: 50px;
-  text-shadow: 2px 2px 0 #000, 0 0 15px rgba(228, 0, 43, 0.5);
+  text-shadow: 2px 2px 0 #000, 0 0 15px rgba(193, 0, 29, 0.5);
   font-family: 'Courier New', monospace;
   letter-spacing: 2px;
 }
@@ -159,8 +201,8 @@ h2 {
     45deg,
     transparent,
     transparent 10px,
-    rgba(0, 0, 40, 0.1) 10px,
-    rgba(0, 0, 40, 0.1) 20px
+    rgba(0, 0, 40, 0.2) 10px,
+    rgba(0, 0, 40, 0.2) 20px
   );
   padding: 20px;
   width: 100%;
@@ -192,10 +234,10 @@ h2 {
 }
 
 /* Character buttons */
-#characterSelection button, #restartButton {
+#characterSelection button {
   padding: 14px 28px;
   font-size: 18px;
-  background: linear-gradient(to bottom, #ff3030, var(--olympic-red));
+  background: linear-gradient(to bottom, #e30022, var(--olympic-red));
   color: white;
   border: none;
   cursor: pointer;
@@ -203,7 +245,7 @@ h2 {
   transition: all 0.1s ease;
   text-transform: uppercase;
   font-weight: bold;
-  box-shadow: 0px 4px 0px #800000, 0 0 8px rgba(228, 0, 43, 0.5);
+  box-shadow: 0px 4px 0px #800000, 0 0 8px rgba(193, 0, 29, 0.5);
   font-family: 'Courier New', monospace;
   letter-spacing: 1px;
   border-radius: var(--button-radius);
@@ -211,16 +253,16 @@ h2 {
   --glow-color: var(--red-glow);
 }
 
-#characterSelection button:hover, #restartButton:hover {
+#characterSelection button:hover {
   transform: translateY(-2px);
-  box-shadow: 0px 6px 0px #800000, 0 0 15px rgba(228, 0, 43, 0.7);
-  background: linear-gradient(to bottom, #ff4040, #ff0000);
+  box-shadow: 0px 6px 0px #800000, 0 0 15px rgba(193, 0, 29, 0.7);
+  background: linear-gradient(to bottom, #ff0022, #d10000);
 }
 
-#characterSelection button:active, #restartButton:active {
+#characterSelection button:active {
   transform: translateY(2px);
-  box-shadow: 0px 2px 0px #800000, 0 0 5px rgba(228, 0, 43, 0.7);
-  background: linear-gradient(to bottom, #e00000, #c00000);
+  box-shadow: 0px 2px 0px #800000, 0 0 5px rgba(193, 0, 29, 0.7);
+  background: linear-gradient(to bottom, #b00000, #900000);
 }
 
 .characterOption {
@@ -235,7 +277,7 @@ h2 {
   height: 120px;
   object-fit: contain;
   margin-bottom: 15px;
-  background: linear-gradient(135deg, #000060, #000040);
+  background: linear-gradient(135deg, #000050, #000030);
   padding: 10px;
   border: 3px solid white;
   border-radius: var(--container-radius);
@@ -257,8 +299,8 @@ h2 {
     45deg,
     transparent,
     transparent 10px,
-    rgba(0, 0, 40, 0.1) 10px,
-    rgba(0, 0, 40, 0.1) 20px
+    rgba(0, 0, 40, 0.2) 10px,
+    rgba(0, 0, 40, 0.2) 20px
   );
   padding: 20px;
   width: 100%;
@@ -270,154 +312,103 @@ h2 {
   --glow-color: var(--blue-glow);
 }
 
-/* Track */
+/* Full-width Track with character animations */
 .track {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   margin-bottom: 20px;
-  background: linear-gradient(135deg, #000060, #000040);
+  background: linear-gradient(135deg, #000050, #000030);
   padding: 15px;
   border: 3px solid white;
   border-radius: var(--container-radius);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 1px 8px rgba(255, 255, 255, 0.1);
+  position: relative;
 }
 
-.runner {
-  width: 70px;
-  height: 70px;
+/* Visual race track with lanes */
+.racetrack {
+  width: 100%;
+  height: 120px;
+  background-color: #000020;
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(var(--container-radius) / 2);
   margin-bottom: 10px;
+  border: 2px solid white;
 }
 
-.runner img {
+/* Lane markings */
+.racetrack::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.3) 20px,
+    transparent 20px,
+    transparent 40px
+  );
+}
+
+/* Finish line */
+.finish-line {
+  position: absolute;
+  right: 15px;
+  top: 0;
+  height: 100%;
+  width: 10px;
+  background: repeating-linear-gradient(
+    to bottom,
+    white,
+    white 10px,
+    black 10px,
+    black 20px
+  );
+}
+
+/* Character sprite containers for actual race */
+.racer {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  transition: left calc(0.5s * var(--race-speed-multiplier)) linear;
+  left: 0;
+}
+
+.racer img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-.progressTrack {
-  height: 30px;
-  width: 100%;
-  background: linear-gradient(to bottom, #000000, #101010);
-  overflow: hidden;
-  position: relative;
-  border: 2px solid white;
-  border-radius: calc(var(--container-radius) / 2);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
+.racer-1 {
+  top: 10px;
 }
 
-.progressBar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to bottom, #ff4040, var(--olympic-red));
-  transition: width 0.3s ease;
-  position: relative;
-  box-shadow: 0 0 8px rgba(228, 0, 43, 0.5);
+.racer-2 {
+  bottom: 10px;
 }
 
-/* Controls */
-#controls {
+/* Simplify progress display */
+.progress-info {
   display: flex;
-  justify-content: space-around;
   width: 100%;
-  margin: 20px 0;
+  justify-content: space-between;
+  margin-bottom: 5px;
 }
 
-#player1Controls, #player2Controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: linear-gradient(135deg, #000060, #000040);
-  padding: 15px;
-  min-width: 200px;
-  border: 2px solid white;
-  border-radius: var(--container-radius);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 1px 8px rgba(255, 255, 255, 0.1);
-}
-
-/* Run Button - KEY INTERACTIVE ELEMENT */
-#runButton1 {
-  padding: 16px 32px;
-  font-size: 22px;
-  background: linear-gradient(to bottom, #ff3030, var(--olympic-red));
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: all 0.10s ease, transform 0.3s ease;
-  text-transform: uppercase;
+.distance-display {
   font-weight: bold;
-  box-shadow: 0px 8px 0px #800000, 0 0 12px rgba(228, 0, 43, 0.6);
-  position: relative;
-  min-width: 160px;
-  letter-spacing: 2px;
-  transform: perspective(1px) translateZ(0) scale(var(--button-scale));
-  user-select: none;
-  transform-origin: center;
   font-family: 'Courier New', monospace;
-  text-shadow: 2px 2px 0 #000;
-  border-radius: var(--button-radius);
-  animation: pulseGlow 3s infinite;
-  --glow-color: var(--red-glow);
-}
-
-#runButton1:active {
-  transform: translateY(5px);
-  box-shadow: 0px 3px 0px #800000, 0 0 8px rgba(228, 0, 43, 0.4);
-  background: linear-gradient(to bottom, #e00000, #c00000);
-}
-
-#runButton1:disabled {
-  background: linear-gradient(to bottom, #999, #777);
-  cursor: not-allowed;
-  box-shadow: 0px 4px 0px #555;
-  opacity: 0.8;
-  animation: none;
-}
-
-/* Button state classes - FUNCTIONAL for gameplay feedback */
-.button-clicked {
-  transform: translateY(4px) scale(0.95) !important;
-  box-shadow: 0px 3px 0px #800000, 0 0 10px rgba(228, 0, 43, 0.5) !important;
-  background: linear-gradient(to bottom, #d00000, #a00000) !important;
-  transition: all 0.05s ease-out !important;
-}
-
-.button-growing {
-  background: linear-gradient(to bottom, #ff4040, var(--olympic-red)) !important;
-  box-shadow: 0px 8px 0px #800000, 0 0 15px rgba(228, 0, 43, 0.8) !important;
-}
-
-/* Button explosion animation - FUNCTIONAL gameplay reward */
-@keyframes explode {
-  0% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 20px 10px var(--gold-glow); }
-  20% { transform: scale(2); background-color: var(--olympic-gold); box-shadow: 0 0 30px 15px var(--gold-glow); }
-  40% { transform: scale(2.2); background-color: white; box-shadow: 0 0 40px 20px rgba(255, 255, 255, 0.5); }
-  60% { transform: scale(2.5); background-color: var(--olympic-red); box-shadow: 0 0 40px 15px var(--red-glow); }
-  80% { transform: scale(2.8); background-color: var(--olympic-blue); box-shadow: 0 0 40px 15px var(--blue-glow); }
-  100% { transform: scale(3); opacity: 0; box-shadow: 0 0 0 0 transparent; }
-}
-
-.button-exploding {
-  animation: explode 0.8s forwards;
-  pointer-events: none !important;
-  border-radius: 50% !important;
-}
-
-p {
   font-size: 16px;
-  margin: 10px 0;
   color: white;
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-}
-
-#controlInstruction {
-  font-weight: bold;
-  color: var(--olympic-gold);
-  font-size: 18px;
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  text-shadow: 1px 1px 0 #000;
 }
 
 #timeElapsed {
@@ -428,32 +419,184 @@ p {
   padding: 5px 10px;
   border: 1px solid #444;
   border-radius: calc(var(--container-radius) / 2);
-  box-shadow: 0 0 8px rgba(228, 0, 43, 0.3);
+  box-shadow: 0 0 8px rgba(193, 0, 29, 0.3);
+  margin: 5px 0;
+}
+
+/* Multi-purpose button - replaces player controls and restart button */
+#actionButton {
+  display: block;
+  padding: 16px 38px;
+  font-size: 22px;
+  background: linear-gradient(to bottom, #e30022, var(--olympic-red));
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.10s ease, transform 0.3s ease;
+  text-transform: uppercase;
+  font-weight: bold;
+  box-shadow: 0px 8px 0px #800000, 0 0 12px rgba(193, 0, 29, 0.6);
+  position: relative;
+  min-width: 260px;
+  min-height: 65px;
+  letter-spacing: 2px;
+  transform: perspective(1px) translateZ(0) scale(var(--button-scale));
+  user-select: none;
+  transform-origin: center;
+  font-family: 'Courier New', monospace;
+  text-shadow: 2px 2px 0 #000;
+  border-radius: 12px;
+  animation: pulseWhiteGlow 3s infinite;
+  --glow-color: var(--white-glow);
+  margin: 20px auto;
+  z-index: 10;
+}
+
+#actionButton:active {
+  transform: translateY(5px);
+  box-shadow: 0px 3px 0px #800000, 0 0 8px rgba(193, 0, 29, 0.4);
+  background: linear-gradient(to bottom, #b00000, #900000);
+}
+
+#actionButton:disabled {
+  background: linear-gradient(to bottom, #999, #777);
+  cursor: not-allowed;
+  box-shadow: 0px 4px 0px #555;
+  opacity: 0.8;
+  animation: none;
+}
+
+/* Button state classes - FUNCTIONAL for gameplay feedback */
+.button-clicked {
+  transform: translateY(4px) scale(0.95) !important;
+  box-shadow: 0px 3px 0px #800000, 0 0 10px rgba(193, 0, 29, 0.5) !important;
+  background: linear-gradient(to bottom, #a00000, #800000) !important;
+  transition: all 0.05s ease-out !important;
+}
+
+.button-growing {
+  background: linear-gradient(to bottom, #e30022, var(--olympic-red)) !important;
+  box-shadow: 0px 8px 0px #800000, 0 0 15px rgba(193, 0, 29, 0.8) !important;
+  animation: growButton 1s infinite !important;
+}
+
+/* Dramatic button shake animation */
+.button-shaking {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both !important;
+  transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+}
+
+/* Button explosion animation with celebration effects */
+@keyframes explode {
+  0% { transform: scale(1.5); opacity: 1; box-shadow: 0 0 20px 10px var(--white-glow); }
+  10% { transform: scale(1.8); background-color: white; box-shadow: 0 0 25px 12px var(--white-glow); }
+  20% { transform: scale(2); background-color: white; box-shadow: 0 0 30px 15px var(--white-glow); }
+  40% { transform: scale(2.2); background-color: var(--olympic-red); box-shadow: 0 0 40px 20px rgba(193, 0, 29, 0.7); }
+  60% { transform: scale(2.5); background-color: var(--olympic-blue); box-shadow: 0 0 40px 20px rgba(0, 51, 110, 0.7); }
+  70% { transform: scale(2.6); background-color: white; box-shadow: 0 0 45px 25px rgba(255, 255, 255, 0.7); }
+  80% { transform: scale(2.8); background-color: var(--olympic-red); box-shadow: 0 0 50px 30px rgba(193, 0, 29, 0.8); }
+  100% { transform: scale(3); opacity: 0; box-shadow: 0 0 60px 35px transparent; }
+}
+
+.button-exploding {
+  animation: explode 1s forwards;
+  pointer-events: none !important;
+  border-radius: 50% !important;
+  z-index: 1000 !important;
+}
+
+/* Confetti particles */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.confetti-red {
+  background-color: var(--olympic-red);
+}
+
+.confetti-blue {
+  background-color: var(--olympic-blue);
+}
+
+.confetti-white {
+  background-color: white;
+}
+
+/* Firework effect */
+.firework {
+  position: fixed;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.firework::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.01);
+  background: radial-gradient(circle, white 0%, transparent 70%);
+  opacity: 0;
+  animation: firework-explode 0.6s forwards;
+}
+
+.firework-red {
+  background-color: var(--olympic-red);
+}
+
+.firework-blue {
+  background-color: var(--olympic-blue);
+}
+
+.firework-white {
+  background-color: white;
+}
+
+p {
+  font-size: 16px;
+  margin: 10px 0;
+  color: white;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 /* Result panel */
 #result {
   margin-top: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #000060, #000040);
-  border: 3px solid var(--olympic-gold);
+  background: linear-gradient(135deg, #000050, #000030);
+  border: 3px solid white;
   width: 80%;
   max-width: 400px;
   position: relative;
   border-radius: var(--container-radius);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 15px var(--gold-glow), inset 0 1px 10px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4), 0 0 15px var(--white-glow), inset 0 1px 10px rgba(255, 255, 255, 0.1);
   animation: pulseGlow 3.5s infinite;
-  --glow-color: var(--gold-glow);
+  --glow-color: var(--white-glow);
 }
 
 #winnerText {
-  color: var(--olympic-gold);
+  color: white;
   margin-bottom: 15px;
   font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: 'Courier New', monospace;
-  text-shadow: 2px 2px 0 #000, 0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 2px 2px 0 #000, 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 #finishTime {
@@ -475,7 +618,7 @@ p {
   font-size: 20px;
   border: 1px solid #444;
   border-radius: calc(var(--container-radius) / 3);
-  box-shadow: 0 0 8px rgba(228, 0, 43, 0.3);
+  box-shadow: 0 0 8px rgba(193, 0, 29, 0.3);
 }
 
 .time-results {
@@ -519,15 +662,6 @@ p {
   display: none !important;
 }
 
-/* Control info - FUNCTIONAL instruction elements */
-.control-info {
-  font-size: 14px;
-  margin-top: 8px;
-  opacity: 0.8;
-  font-style: italic;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
-}
-
 .mobile-only {
   display: none;
 }
@@ -563,37 +697,27 @@ p {
     padding: 15px;
   }
   
-  #controls {
-    flex-direction: column;
+  .racer {
+    width: 40px;
+    height: 40px;
   }
   
-  #player1Controls, #player2Controls {
-    margin-bottom: 15px;
-    width: 90%;
-  }
-  
-  .runner {
-    width: 50px;
-    height: 50px;
+  .racetrack {
+    height: 100px;
   }
   
   /* Mobile-specific button enhancements - FUNCTIONAL */
-  #runButton1 {
+  #actionButton {
     padding: 18px 30px;
     width: 85%;
     min-height: 70px;
     font-size: 24px;
     margin: 15px auto;
-    border-radius: calc(var(--button-radius) * 1.5);
+    border-radius: 16px;
   }
   
-  #runButton1:active {
+  #actionButton:active {
     transform: translateY(5px) scale(0.98);
-  }
-  
-  /* Increase padding to make button easier to tap - FUNCTIONAL */
-  #player1Controls {
-    padding: 15px 10px 20px;
   }
   
   #result {

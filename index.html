@@ -2,90 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#000080">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>World Class 100 Meter Mash</title>
-  <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/itc-benguiat-std" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="gameContainer">
+    <!-- Title -->
     <div class="title-container">
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
-      <div class="star"></div>
       <h1>World Class 100 Meter Mash</h1>
+      <div class="subtitle">You Become The Champion</div>
     </div>
-    <div class="title-underline"></div>
-    <div class="pixel-text subtitle">Are you Olympic Class?</div>
     
+    <!-- Character Selection Screen -->
     <div id="characterSelection">
-      <h2>Select Your Champion:</h2>
+      <h2>Choose Your Sprinter</h2>
+      <div class="olympic-banner"></div>
+      
       <div class="characterOption">
         <img src="bolt-sprite.gif" alt="Bolt" class="charPreview">
-        <button id="boltButton" class="pixel-text">Inzan Fire</button>
+        <button id="boltButton">Bolt</button>
       </div>
+      
       <div class="characterOption">
-        <img src="nkdman-running.gif" alt="Nkdman" class="charPreview">
-        <button id="nkdmanButton" class="pixel-text">Nkdman</button>
+        <img src="nkdman-running.gif" alt="Naked Man" class="charPreview">
+        <button id="nkdmanButton">Nkdman</button>
       </div>
     </div>
     
+    <!-- Game Screen -->
     <div id="game">
-      <div id="countdown" class="countdown-display"></div>
+      <h2>100 Meter Dash</h2>
+      <div class="olympic-banner"></div>
       
-      <div id="trackContainer">
-        <div id="track1" class="track">
-          <div class="runner">
-            <img id="player1Sprite" src="" alt="You">
+      <!-- Countdown display -->
+      <div class="countdown-display" id="countdown"></div>
+      
+      <!-- Full-width track with visual racers -->
+      <div class="track">
+        <div class="racetrack">
+          <div class="racer racer-1">
+            <img id="player1Sprite" src="" alt="Player 1">
           </div>
-          <div class="progressTrack">
-            <div id="progressBar1" class="progressBar"></div>
+          <div class="racer racer-2">
+            <img id="player2Sprite" src="" alt="Player 2">
           </div>
+          <div class="finish-line"></div>
         </div>
         
-        <div id="track2" class="track">
-          <div class="runner">
-            <img id="player2Sprite" src="" alt="Computer">
-          </div>
-          <div class="progressTrack">
-            <div id="progressBar2" class="progressBar"></div>
-          </div>
+        <!-- Progress information -->
+        <div class="progress-info">
+          <span class="distance-display" id="distance1">0.0m</span>
+          <span id="timeElapsed">0.00</span>
+          <span class="distance-display" id="distance2">0.0m</span>
         </div>
       </div>
       
-      <div id="controls">
-        <div id="player1Controls">
-          <p>Your Progress: <span id="distance1">0.0</span> meters</p>
-          <button id="runButton1" class="pixel-text">MASH!</button>
-          <p class="control-info">
-            <span class="mobile-only">TAP fast to sprint!</span>
-            <span class="desktop-only">CLICK or SPACE fast!</span>
-          </p>
-        </div>
-        
-        <div id="player2Controls">
-          <p>Computer: <span id="distance2">0.0</span> meters</p>
-          <p id="controlInstruction" class="pixel-text">Computer Runner</p>
-        </div>
-      </div>
+      <!-- Multi-purpose action button -->
+      <button id="actionButton">READY...</button>
       
-      <p>Time elapsed: <span id="timeElapsed">0.00</span> seconds</p>
-      
+      <!-- Results Panel -->
       <div id="result" class="hidden">
-        <div class="olympic-banner"></div>
-        <h2 id="winnerText" class="pixel-text"></h2>
+        <div id="winnerText"></div>
         <div id="finishTime"></div>
-        <button id="restartButton" class="pixel-text">Race Again</button>
       </div>
     </div>
   </div>
-
+  
   <script src="app.js"></script>
 </body>
 </html>
