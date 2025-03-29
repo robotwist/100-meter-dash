@@ -19,6 +19,7 @@ let buttonGrowthFactor = 1; // Variable for button size
 let isMobileDevice = false; // Flag for detecting mobile devices
 let gameState = 'selection'; // Tracks current game state: selection, countdown, racing, finished
 let difficultyFactor = 0.65; // Adjusted to make game challenging but allow for realistic times
+let celebrationActive = false; // Flag to track if celebration sequence is active
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -78,6 +79,7 @@ function setupGame() {
   player2Time = 0;
   buttonGrowthFactor = 1; // Reset button size
   gameState = 'countdown';
+  celebrationActive = false;
   
   // Reset button appearance and text
   actionButton.classList.remove('button-exploding', 'button-growing', 'button-shaking');
@@ -95,6 +97,11 @@ function setupGame() {
   
   // Hide results
   result.classList.add('hidden');
+  
+  // Clean up any existing celebration effects
+  document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+    el.remove();
+  });
   
   // Start countdown
   startCountdown();
@@ -194,15 +201,18 @@ actionButton.addEventListener('click', () => {
       break;
     
     case 'finished':
+      // Don't allow clicking during celebration sequence
+      if (celebrationActive) return;
+      
       // Add the shake effect when the button is clicked
       actionButton.classList.add('button-shaking');
       
       // Remove celebration effects
-      document.querySelectorAll('.confetti, .firework').forEach(el => {
+      document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
         el.remove();
       });
       
-      // After shake animation, restart the race with the same characters
+      // After shake animation, return to character selection
       setTimeout(() => {
         actionButton.classList.remove('button-shaking');
         
@@ -210,8 +220,11 @@ actionButton.addEventListener('click', () => {
         if (gameInterval) clearInterval(gameInterval);
         if (computerRunInterval) clearInterval(computerRunInterval);
         
-        // Restart the race with the same characters
-        setupGame();
+        // Return to character selection screen
+        game.style.display = 'none';
+        characterSelection.style.display = 'flex';
+        gameState = 'selection';
+        result.classList.add('hidden');
       }, 500); // Wait for shake animation to finish
       break;
   }
@@ -243,8 +256,8 @@ document.addEventListener('keydown', (e) => {
       setTimeout(() => {
         actionButton.classList.remove('button-clicked');
       }, 50);
-    } else if (gameState === 'finished') {
-      // Space to restart - simulate button click for the shake effect
+    } else if (gameState === 'finished' && !celebrationActive) {
+      // Space to go back to character selection - simulate button click for the shake effect
       e.preventDefault();
       actionButton.click();
     }
@@ -396,6 +409,54 @@ function createFirework() {
   }, 1000);
 }
 
+// Function to create celebration text animation
+function createCelebrationText(text, delay) {
+  setTimeout(() => {
+    const celebText = document.createElement('div');
+    celebText.className = 'celebration-text';
+    celebText.textContent = text;
+    
+    // Random position in upper part of the screen
+    const posX = 50 + Math.random() * (window.innerWidth - 300);
+    const posY = 100 + Math.random() * 150;
+    
+    // Apply styles
+    celebText.style.left = `${posX}px`;
+    celebText.style.top = `${posY}px`;
+    celebText.style.fontSize = `${Math.floor(30 + Math.random() * 20)}px`;
+    
+    // Random color from theme
+    const colors = ['var(--olympic-red)', 'var(--olympic-blue)', 'white'];
+    celebText.style.color = colors[Math.floor(Math.random() * colors.length)];
+    
+    // Add to document
+    document.body.appendChild(celebText);
+    
+    // Remove after animation completes
+    setTimeout(() => {
+      celebText.remove();
+    }, 2500);
+  }, delay);
+}
+
+// Function to create medal animation if player wins
+function createMedal() {
+  const medal = document.createElement('div');
+  medal.className = 'medal';
+  
+  // Position above results panel
+  const resultsRect = result.getBoundingClientRect();
+  const posX = resultsRect.left + (resultsRect.width / 2) - 40;
+  const posY = resultsRect.top - 100;
+  
+  // Apply styles
+  medal.style.left = `${posX}px`;
+  medal.style.top = `${posY}px`;
+  
+  // Add to document
+  document.body.appendChild(medal);
+}
+
 // Function to show winner notification
 function showWinner() {
   // This function announces the winner but doesn't stop the race
@@ -415,6 +476,92 @@ function trackTime() {
   }
 }
 
+// Function to play the celebration sequence
+function playCelebrationSequence() {
+  celebrationActive = true;
+  
+  // Disable the action button during celebration
+  actionButton.disabled = true;
+  
+  // Hide the action button temporarily
+  actionButton.style.opacity = '0';
+  
+  // Extract times for celebration text display
+  const playerTimeText = player1Time > 0 ? player1Time.toFixed(2) : 'DNF';
+  const computerTimeText = player2Time > 0 ? player2Time.toFixed(2) : 'DNF';
+  
+  // Celebration messages
+  const messages = [
+    "GREAT RACE!",
+    "WORLD CLASS!",
+    winner === 'player1' ? "YOU WIN!" : "COMPUTER WINS!",
+    `YOUR TIME: ${playerTimeText}s`,
+    `COMPUTER: ${computerTimeText}s`
+  ];
+  
+  // Create fireworks throughout celebration
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => {
+      createFirework();
+    }, 300 * i);
+  }
+  
+  // Display celebration text messages with staggered timing
+  messages.forEach((message, index) => {
+    createCelebrationText(message, index * 800);
+  });
+  
+  // If player wins, display a medal after a delay
+  if (winner === 'player1') {
+    setTimeout(() => {
+      createMedal();
+      
+      // Create extra fireworks for winner
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => createFirework(), i * 200);
+      }
+    }, 2500);
+  }
+  
+  // Add more fireworks toward the end of the celebration
+  setTimeout(() => {
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => createFirework(), i * 200);
+    }
+  }, 6000);
+  
+  // Show a "10 SECOND COOLDOWN" message after initial celebration
+  setTimeout(() => {
+    actionButton.style.opacity = '0.5';
+    actionButton.textContent = 'COOLDOWN...';
+    
+    // Create a countdown effect on the button
+    let countdown = 5;
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+      } else {
+        // Create one more celebration text in the center
+        createCelebrationText(`${countdown}...`, 0);
+      }
+    }, 1000);
+  }, 5000);
+  
+  // Gradually bring back the action button after celebration (10 seconds total)
+  setTimeout(() => {
+    actionButton.style.opacity = '1';
+    actionButton.disabled = false;
+    actionButton.textContent = 'CHOOSE SPRINTER';
+    celebrationActive = false;
+    
+    // Final burst of confetti when button becomes active
+    for (let i = 0; i < 30; i++) {
+      setTimeout(() => createConfetti(), i * 30);
+    }
+  }, 10000);
+}
+
 // Function to handle race finish
 function finishRace() {
   gameActive = false;
@@ -422,11 +569,7 @@ function finishRace() {
   clearInterval(gameInterval);
   clearInterval(computerRunInterval);
   
-  // Update action button
-  actionButton.disabled = false;
-  actionButton.textContent = 'RACE AGAIN';
-  
-  // Show results
+  // First show results
   result.classList.remove('hidden');
   
   // Create result message with both times
@@ -446,4 +589,9 @@ function finishRace() {
   
   resultMessage += '</div>';
   finishTime.innerHTML = resultMessage;
+  
+  // After a short delay, play the celebration sequence
+  setTimeout(() => {
+    playCelebrationSequence();
+  }, 800);
 }
