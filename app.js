@@ -714,6 +714,9 @@ function setupGame() {
   // Check if the player should get a comeback boost (level 3 after a loss)
   comebackBoostActive = (currentLevel === 3 && recentlyLost);
   
+  // Apply level-specific theme
+  applyLevelTheme();
+  
   // Update the level display
   if (levelDisplay) {
     // Show level-appropriate progressive difficulty information
@@ -775,10 +778,76 @@ function setupGame() {
   startCountdown();
 }
 
+// Function to apply the level-specific theme based on current level
+function applyLevelTheme() {
+  // First, remove any existing theme classes
+  const gameContainer = document.getElementById('gameContainer');
+  if (!gameContainer) return;
+  
+  // Remove all theme classes
+  gameContainer.classList.remove(
+    'level-theme-1', 
+    'level-theme-2', 
+    'level-theme-3', 
+    'level-theme-4', 
+    'level-theme-5', 
+    'space-theme'
+  );
+  
+  // Apply the appropriate theme class based on the current level
+  if (spaceModeActive) {
+    gameContainer.classList.add('space-theme');
+    
+    // Remove regular space track class since we're using the enhanced theme
+    document.querySelector('.racetrack').classList.remove('space-track');
+  } else {
+    // For regular levels
+    gameContainer.classList.add(`level-theme-${currentLevel}`);
+  }
+  
+  // Special handling for the comeback boost visual in level 3
+  if (currentLevel === 3 && comebackBoostActive) {
+    gameContainer.classList.add('comeback-active');
+  } else {
+    gameContainer.classList.remove('comeback-active');
+  }
+  
+  // Update any other theme-specific elements
+  updateThemeColors();
+}
+
+// Update any dynamic colors or styles based on the current theme
+function updateThemeColors() {
+  // Get the root element for CSS variables
+  const root = document.documentElement;
+  
+  // Set theme-specific CSS variables
+  if (spaceModeActive) {
+    root.style.setProperty('--button-glow', 'rgba(0, 255, 255, 0.7)');
+    root.style.setProperty('--celebration-color', '#00ffff');
+  } else if (currentLevel === 5) {
+    root.style.setProperty('--button-glow', 'rgba(255, 215, 0, 0.7)');
+    root.style.setProperty('--celebration-color', '#ffd700');
+  } else if (currentLevel === 4) {
+    root.style.setProperty('--button-glow', 'rgba(192, 192, 192, 0.7)');
+    root.style.setProperty('--celebration-color', '#c0c0c0');
+  } else if (currentLevel === 3) {
+    root.style.setProperty('--button-glow', 'rgba(70, 130, 180, 0.7)');
+    root.style.setProperty('--celebration-color', '#4682b4');
+  } else if (currentLevel === 2) {
+    root.style.setProperty('--button-glow', 'rgba(255, 69, 0, 0.7)');
+    root.style.setProperty('--celebration-color', '#ff4500');
+  } else {
+    // Level 1 default
+    root.style.setProperty('--button-glow', 'rgba(255, 255, 255, 0.7)');
+    root.style.setProperty('--celebration-color', '#ffffff');
+  }
+}
+
 // Function to setup space mode
 function setupSpaceMode() {
-  // Change track background to space
-  document.querySelector('.racetrack').classList.add('space-track');
+  // Space theme is now applied in applyLevelTheme()
+  // We just need to add any space-specific game elements
   
   // Change character sprites to flying versions if available
   if (player1Character === 'bolt') {

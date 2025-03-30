@@ -2049,3 +2049,258 @@ p {
   animation: pulseGlow 2s infinite;
   --glow-color: var(--gold-glow);
 }
+
+/* Level-specific themes */
+.level-theme-1 .racetrack {
+  background: linear-gradient(to bottom, #87ceeb, #f0f8ff);
+  border-color: #4682b4;
+}
+
+.level-theme-1 .track {
+  background: linear-gradient(to right, #d13438, #d13438);
+}
+
+.level-theme-1 .finish-line {
+  background-color: #000;
+}
+
+.level-theme-2 .racetrack {
+  background: linear-gradient(to bottom, #ff7f50, #ffd700);
+  border-color: #ff4500;
+}
+
+.level-theme-2 .track {
+  background: linear-gradient(to right, #ff6347, #ff6347);
+}
+
+.level-theme-2 .finish-line {
+  background-color: #000;
+}
+
+.level-theme-2 #actionButton {
+  background: linear-gradient(135deg, #ff7f50, #ff4500);
+}
+
+.level-theme-2 #actionButton:active {
+  background: linear-gradient(135deg, #ff4500, #ff7f50);
+}
+
+.level-theme-3 .racetrack {
+  background: linear-gradient(to bottom, #191970, #4169e1);
+  border-color: #000080;
+}
+
+.level-theme-3 .track {
+  background: linear-gradient(to right, #6a5acd, #6a5acd);
+}
+
+.level-theme-3 .finish-line {
+  background-color: #ddd;
+  box-shadow: 0 0 10px #fff;
+}
+
+.level-theme-3 #actionButton {
+  background: linear-gradient(135deg, #4169e1, #191970);
+  color: #ddd;
+}
+
+.level-theme-3 #actionButton:active {
+  background: linear-gradient(135deg, #191970, #4169e1);
+}
+
+.level-theme-3 #timeElapsed, 
+.level-theme-3 .distance-display {
+  color: #ddd;
+  text-shadow: 0 0 5px #fff;
+}
+
+.level-theme-3.flame-trail::before {
+  background: linear-gradient(to right, transparent, #1e90ff, #00bfff, transparent);
+}
+
+.level-theme-4 .racetrack {
+  background: linear-gradient(to bottom, #2f4f4f, #808080);
+  border-color: #696969;
+  position: relative;
+  overflow: hidden;
+}
+
+.level-theme-4 .racetrack::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><line x1="0" y1="0" x2="50" y2="50" style="stroke:rgba(255,255,255,0.2);stroke-width:1" /><line x1="50" y1="0" x2="0" y2="50" style="stroke:rgba(255,255,255,0.2);stroke-width:1" /></svg>');
+  pointer-events: none;
+  animation: rain 0.5s linear infinite;
+}
+
+@keyframes rain {
+  from { background-position: 0 0; }
+  to { background-position: 50px 50px; }
+}
+
+.level-theme-4 .track {
+  background: linear-gradient(to right, #696969, #696969);
+}
+
+.level-theme-4 .finish-line {
+  background-color: #ddd;
+}
+
+.level-theme-4 #actionButton {
+  background: linear-gradient(135deg, #696969, #2f4f4f);
+  color: #fff;
+}
+
+.level-theme-4 #actionButton:active {
+  background: linear-gradient(135deg, #2f4f4f, #696969);
+}
+
+.level-theme-4 .racer img {
+  filter: brightness(0.9);
+}
+
+.level-theme-5 .racetrack {
+  background: linear-gradient(to bottom, #4b0082, #9400d3);
+  border-color: #800080;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.level-theme-5 .track {
+  background: linear-gradient(to right, #9370db, #9370db);
+  box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.7);
+}
+
+.level-theme-5 .finish-line {
+  background-color: #ffd700;
+  box-shadow: 0 0 15px #ffd700;
+}
+
+.level-theme-5 #actionButton {
+  background: linear-gradient(135deg, #9400d3, #4b0082);
+  color: #fff;
+  border: 2px solid rgba(255, 215, 0, 0.7);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.level-theme-5 #actionButton:active {
+  background: linear-gradient(135deg, #4b0082, #9400d3);
+}
+
+.level-theme-5 #timeElapsed, 
+.level-theme-5 .distance-display {
+  color: #ffd700;
+  text-shadow: 0 0 5px #ffd700;
+}
+
+.level-theme-5 .racer-1 {
+  animation: champion-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes champion-glow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.7)); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.9)); }
+}
+
+/* Enhanced Space Theme */
+.space-theme .racetrack {
+  background: linear-gradient(to bottom, #000022, #000055);
+  border-color: #000088;
+  position: relative;
+  overflow: hidden;
+}
+
+.space-theme .racetrack::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(1px 1px at 10px 10px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 30px 40px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 70px 30px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 100px 60px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 130px 10px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)),
+    radial-gradient(1px 1px at 170px 50px, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+  background-size: 200px 100px;
+  background-repeat: repeat;
+  animation: twinkling 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes twinkling {
+  from { background-position: 0 0; }
+  to { background-position: 200px 100px; }
+}
+
+.space-theme .track {
+  background: linear-gradient(to right, rgba(0, 60, 170, 0.3), rgba(0, 60, 170, 0.3));
+  border: 1px solid rgba(0, 120, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+}
+
+.space-theme .finish-line {
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+.space-theme #actionButton {
+  background: linear-gradient(135deg, #000088, #0000ff);
+  color: #fff;
+  border: 2px solid rgba(0, 255, 255, 0.7);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+.space-theme #actionButton:active {
+  background: linear-gradient(135deg, #0000ff, #000088);
+}
+
+.space-theme #timeElapsed, 
+.space-theme .distance-display {
+  color: #00ffff;
+  text-shadow: 0 0 6px #00ffff;
+}
+
+.space-theme .racer img {
+  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.8));
+}
+
+.space-theme .alien {
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+}
+
+.space-theme .powerup {
+  box-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+}
+
+.space-theme .laser {
+  background: linear-gradient(to right, #ff0000, #ff6666);
+  box-shadow: 0 0 10px #ff0000;
+}
+
+.space-theme .racer-1 {
+  position: relative;
+}
+
+.space-theme .racer-1::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -20px;
+  width: 20px;
+  height: 2px;
+  background: linear-gradient(to left, rgba(0, 255, 255, 0.8), transparent);
+  box-shadow: 0 0 5px rgba(0, 255, 255, 0.8);
+  transform: translateY(-50%);
+  animation: space-engine 0.5s infinite alternate;
+}
+
+@keyframes space-engine {
+  from { width: 20px; opacity: 0.5; }
+  to { width: 30px; opacity: 0.8; }
+}
