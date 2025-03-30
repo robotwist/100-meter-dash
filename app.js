@@ -283,10 +283,44 @@ initializeTopTimes();
 // Event listeners for leaderboard buttons
 if (viewLeaderboardBtn) {
   viewLeaderboardBtn.addEventListener('click', showLeaderboard);
+  
+  // Add touch handler for mobile
+  viewLeaderboardBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    viewLeaderboardBtn.classList.add('button-clicked');
+    
+    // Short delay for visual feedback
+    setTimeout(() => {
+      viewLeaderboardBtn.classList.remove('button-clicked');
+      showLeaderboard();
+    }, 100);
+  });
+  
+  viewLeaderboardBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    viewLeaderboardBtn.classList.remove('button-clicked');
+  });
 }
 
 if (backFromLeaderboardBtn) {
   backFromLeaderboardBtn.addEventListener('click', hideLeaderboard);
+  
+  // Add touch handler for mobile
+  backFromLeaderboardBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    backFromLeaderboardBtn.classList.add('button-clicked');
+    
+    // Short delay for visual feedback
+    setTimeout(() => {
+      backFromLeaderboardBtn.classList.remove('button-clicked');
+      hideLeaderboard();
+    }, 100);
+  });
+  
+  backFromLeaderboardBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    backFromLeaderboardBtn.classList.remove('button-clicked');
+  });
 }
 
 // Event listeners for leaderboard tabs
@@ -295,6 +329,31 @@ if (leaderboardTabs) {
     if (e.target.classList.contains('leaderboard-tab')) {
       const levelKey = e.target.dataset.level;
       updateLeaderboardDisplay(levelKey);
+    }
+  });
+  
+  // Add touch handler for mobile
+  leaderboardTabs.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('leaderboard-tab')) {
+      e.preventDefault();
+      const tab = e.target;
+      const levelKey = tab.dataset.level;
+      
+      // Add visual feedback
+      tab.classList.add('button-clicked');
+      
+      // Short delay for visual feedback
+      setTimeout(() => {
+        tab.classList.remove('button-clicked');
+        updateLeaderboardDisplay(levelKey);
+      }, 100);
+    }
+  });
+  
+  leaderboardTabs.addEventListener('touchend', (e) => {
+    if (e.target.classList.contains('leaderboard-tab')) {
+      e.preventDefault();
+      e.target.classList.remove('button-clicked');
     }
   });
 }
@@ -308,6 +367,20 @@ document.addEventListener('DOMContentLoaded', function() {
       cycleCharacter('up', position);
       setActiveCharacter(position);
     });
+    
+    // Add touch handler for mobile
+    button.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      button.classList.add('button-clicked');
+      const position = parseInt(button.dataset.pos);
+      cycleCharacter('up', position);
+      setActiveCharacter(position);
+    });
+    
+    button.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      button.classList.remove('button-clicked');
+    });
   });
   
   document.querySelectorAll('.down-button').forEach(button => {
@@ -316,12 +389,41 @@ document.addEventListener('DOMContentLoaded', function() {
       cycleCharacter('down', position);
       setActiveCharacter(position);
     });
+    
+    // Add touch handler for mobile
+    button.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      button.classList.add('button-clicked');
+      const position = parseInt(button.dataset.pos);
+      cycleCharacter('down', position);
+      setActiveCharacter(position);
+    });
+    
+    button.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      button.classList.remove('button-clicked');
+    });
   });
   
   // Add listeners for character boxes (when clicked, make active)
   document.querySelectorAll('.character-box').forEach((box, index) => {
     box.addEventListener('click', () => {
       setActiveCharacter(index);
+    });
+    
+    // Add touch handler for mobile
+    box.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      setActiveCharacter(index);
+      box.classList.add('touched');
+      setTimeout(() => {
+        box.classList.remove('touched');
+      }, 100);
+    });
+    
+    box.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      box.classList.remove('touched');
     });
   });
   
@@ -401,12 +503,54 @@ boltButton.addEventListener('click', () => {
   setupGame();
 });
 
+// Add touch handler for mobile
+boltButton.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  boltButton.classList.add('button-clicked');
+  player1Character = 'bolt';
+  player1Sprite.src = 'bolt-sprite.gif';
+  player2Character = 'nkdman';
+  player2Sprite.src = 'nkdman-running.gif';
+  
+  // Short delay for visual feedback
+  setTimeout(() => {
+    boltButton.classList.remove('button-clicked');
+    setupGame();
+  }, 100);
+});
+
+boltButton.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  boltButton.classList.remove('button-clicked');
+});
+
 nkdmanButton.addEventListener('click', () => {
   player1Character = 'nkdman';
   player1Sprite.src = 'nkdman-running.gif';
   player2Character = 'bolt';
   player2Sprite.src = 'bolt-sprite.gif';
   setupGame();
+});
+
+// Add touch handler for mobile
+nkdmanButton.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  nkdmanButton.classList.add('button-clicked');
+  player1Character = 'nkdman';
+  player1Sprite.src = 'nkdman-running.gif';
+  player2Character = 'bolt';
+  player2Sprite.src = 'bolt-sprite.gif';
+  
+  // Short delay for visual feedback
+  setTimeout(() => {
+    nkdmanButton.classList.remove('button-clicked');
+    setupGame();
+  }, 100);
+});
+
+nkdmanButton.addEventListener('touchend', (e) => {
+  e.preventDefault();
+  nkdmanButton.classList.remove('button-clicked');
 });
 
 // Function to create custom comeback boost celebration
@@ -1103,6 +1247,49 @@ function showPostRaceScreen() {
       }, 1500);
     }
   }
+  
+  // Add auto-transition after 10 seconds to ensure mobile players can progress
+  // This helps if touch events don't register properly
+  let autoProgressTimer = setTimeout(() => {
+    // If we're still in post-race state after 10 seconds
+    if (gameState === 'post-race') {
+      // Make sure any pending initials entry is handled
+      if (pendingInitialsEntry) {
+        addTopTime(
+          pendingInitialsEntry.level, 
+          pendingInitialsEntry.time, 
+          currentInitials || "AAA"
+        );
+        pendingInitialsEntry = null;
+        initialsPopup.classList.add('hidden');
+      }
+      
+      // Flash the continue button to indicate auto-transition
+      if (continueButton) {
+        continueButton.classList.add('continue-highlight');
+        
+        setTimeout(() => {
+          // Simulate continue button click
+          if (winner === 'player1') {
+            // Player won, advance to next level
+            currentLevel++;
+            recentlyLost = false; // Reset loss tracking after a win
+            setupGame();
+          } else {
+            // Player lost, go back to character selection
+            game.style.display = 'none';
+            postRaceScreen.style.display = 'none';
+            characterSelection.style.display = 'flex';
+            gameState = 'selection';
+            recentlyLost = true; // Track that player lost
+            currentLevel = 1; // Reset to level 1
+          }
+          
+          continueButton.classList.remove('continue-highlight');
+        }, 1000);
+      }
+    }
+  }, 10000);
 }
 
 // Function to update the top times display in the post-race screen
