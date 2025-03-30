@@ -30,6 +30,8 @@ let topTimesData = {}; // Object to store top times for each level
 let pendingInitialsEntry = null; // Object to store pending top time entry needing initials
 let currentInitialsPosition = 0; // Tracks current position in initials input
 let currentInitials = "AAA"; // Default initials value
+let recentlyLost = false; // Track if player recently lost
+let comebackBoostActive = false; // Track if comeback boost is active
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -391,6 +393,82 @@ nkdmanButton.addEventListener('click', () => {
   setupGame();
 });
 
+// Function to create custom comeback boost celebration
+function createComebackEffect() {
+  // Create special comeback text
+  const comebackText = document.createElement('div');
+  comebackText.className = 'comeback-text';
+  comebackText.textContent = "COMEBACK BOOST ACTIVATED!";
+  
+  // Position in the center of the screen
+  const posX = window.innerWidth / 2 - 200;
+  const posY = window.innerHeight / 2 - 100;
+  
+  // Apply styles
+  comebackText.style.left = `${posX}px`;
+  comebackText.style.top = `${posY}px`;
+  
+  // Add to document
+  document.body.appendChild(comebackText);
+  
+  // Create golden particles
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const particle = document.createElement('div');
+      particle.className = 'confetti confetti-gold';
+      
+      // Random position around the player
+      const playerRect = document.querySelector('.racer-1').getBoundingClientRect();
+      const startX = playerRect.left + (Math.random() * playerRect.width);
+      const startY = playerRect.top + (Math.random() * playerRect.height);
+      
+      // Apply styles
+      particle.style.left = `${startX}px`;
+      particle.style.top = `${startY}px`;
+      particle.style.opacity = '1';
+      particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+      
+      // Random animation duration
+      const fallDuration = 2 + Math.random() * 2;
+      
+      particle.style.animation = `
+        confetti-fall ${fallDuration}s linear forwards, 
+        confetti-sway ${fallDuration / 2}s ease-in-out infinite alternate
+      `;
+      
+      // Add to document
+      document.body.appendChild(particle);
+      
+      // Remove after animation completes
+      setTimeout(() => {
+        particle.remove();
+      }, fallDuration * 1000);
+    }, i * 20);
+  }
+  
+  // Remove comeback text after animation
+  setTimeout(() => {
+    comebackText.remove();
+    
+    // Add second message
+    const speedText = document.createElement('div');
+    speedText.className = 'comeback-text';
+    speedText.textContent = "SPEED +25%!";
+    
+    // Position
+    speedText.style.left = `${posX + 50}px`;
+    speedText.style.top = `${posY + 60}px`;
+    
+    // Add to document
+    document.body.appendChild(speedText);
+    
+    // Remove after animation
+    setTimeout(() => {
+      speedText.remove();
+    }, 2500);
+  }, 2500);
+}
+
 // Function to setup the game and start countdown
 function setupGame() {
   // Hide character selection and show game
@@ -415,6 +493,9 @@ function setupGame() {
   gameState = 'countdown';
   celebrationActive = false;
   viewingLeaderboard = false;
+  
+  // Check if the player should get a comeback boost (level 3 after a loss)
+  comebackBoostActive = (currentLevel === 3 && recentlyLost);
   
   // Update the level display
   if (levelDisplay) {
@@ -445,9 +526,22 @@ function setupGame() {
   result.classList.add('hidden');
   
   // Clean up any existing celebration effects
-  document.querySelectorAll('.confetti, .firework, .celebration-text, .medal, .powerup, .alien').forEach(el => {
+  document.querySelectorAll('.confetti, .firework, .celebration-text, .medal, .powerup, .alien, .comeback-text').forEach(el => {
     el.remove();
   });
+  
+  // Apply comeback boost visual effect if active
+  if (comebackBoostActive) {
+    // Wait until after countdown to show boost effect
+    setTimeout(() => {
+      createComebackEffect();
+      // Show visual effect on player
+      player1Sprite.classList.add('boosted');
+    }, 4500); // Show after countdown finishes
+  } else {
+    // Remove boosted class if it exists
+    player1Sprite.classList.remove('boosted');
+  }
   
   // Start countdown
   startCountdown();
@@ -606,15 +700,25 @@ function updateRacersPosition() {
   const position2 = Math.min((distance2 / goal) * finishPosition, finishPosition);
   
   // Update racer positions
-  document.querySelector('.racer-1').style.left = position1 + 'px';
-  document.querySelector('.racer-2').style.left = position2 + 'px';
+  const player1Racer = document.querySelector('.racer-1');
+  const player2Racer = document.querySelector('.racer-2');
+  
+  player1Racer.style.left = position1 + 'px';
+  player2Racer.style.left = position2 + 'px';
+  
+  // Apply flame trail effect if boost is active
+  if (comebackBoostActive) {
+    player1Racer.classList.add('flame-trail');
+  } else {
+    player1Racer.classList.remove('flame-trail');
+  }
   
   // In space mode, check for collisions with power-ups and aliens
   if (spaceModeActive) {
     // Check power-up collisions
     document.querySelectorAll('.powerup').forEach(powerUp => {
       const powerUpRect = powerUp.getBoundingClientRect();
-      const playerRect = document.querySelector('.racer-1').getBoundingClientRect();
+      const playerRect = player1Racer.getBoundingClientRect();
       
       // Simple collision detection
       if (
@@ -756,6 +860,7 @@ actionButton.addEventListener('click', () => {
       if (winner === 'player1') {
         // Player won, advance to next level
         currentLevel++;
+        recentlyLost = false; // Reset loss tracking after a win
         setupGame();
       } else {
         // Player lost, go back to character selection
@@ -763,6 +868,7 @@ actionButton.addEventListener('click', () => {
         postRaceScreen.style.display = 'none';
         characterSelection.style.display = 'flex';
         gameState = 'selection';
+        recentlyLost = true; // Track that player lost
         currentLevel = 1; // Reset to level 1
       }
       break;
@@ -787,6 +893,7 @@ if (continueButton) {
       if (winner === 'player1') {
         // Player won, advance to next level
         currentLevel++;
+        recentlyLost = false; // Reset loss tracking after a win
         setupGame();
       } else {
         // Player lost, go back to character selection
@@ -794,6 +901,7 @@ if (continueButton) {
         postRaceScreen.style.display = 'none';
         characterSelection.style.display = 'flex';
         gameState = 'selection';
+        recentlyLost = true; // Track that player lost
         currentLevel = 1; // Reset to level 1
       }
     }
@@ -1033,8 +1141,11 @@ function movePlayer(playerNum) {
     // The base calculation is tuned so that even with perfect clicking, this time is the minimum
     const speedMultiplier = 1.7;
     
+    // Apply comeback boost if active (25% speed boost)
+    const boostMultiplier = comebackBoostActive ? 1.25 : 1.0;
+    
     // Calculate a capped movement amount - prevents exceeding human speed limits
-    const baseMovement = (Math.random() * 1.3 + 0.7) * speedMultiplier * difficultyFactor;
+    const baseMovement = (Math.random() * 1.3 + 0.7) * speedMultiplier * difficultyFactor * boostMultiplier;
     
     // Apply progress-based speed cap (simulates human energy limitations)
     const progressPercent = distance1 / goal;

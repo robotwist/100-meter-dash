@@ -1858,3 +1858,98 @@ p {
     padding: 14px 28px;
   }
 }
+
+@keyframes boosted-glow {
+  0% { 
+    filter: drop-shadow(0 0 3px rgba(255, 255, 0, 0.5)) brightness(1);
+    transform: scale(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9)) brightness(1.2);
+    transform: scale(1.05);
+  }
+  100% { 
+    filter: drop-shadow(0 0 3px rgba(255, 255, 0, 0.5)) brightness(1);
+    transform: scale(1);
+  }
+}
+
+.racer img.boosted {
+  animation: boosted-glow 0.7s infinite;
+  position: relative;
+}
+
+.racer img.boosted::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+/* Create an animated flame trail for the boosted player */
+@keyframes flame-trail {
+  0% { 
+    opacity: 0.8;
+    transform: scale(1) translateX(0);
+  }
+  100% { 
+    opacity: 0;
+    transform: scale(0.5) translateX(-30px);
+  }
+}
+
+.racer-1.flame-trail::before {
+  content: "";
+  position: absolute;
+  top: 10%;
+  right: 90%;
+  width: 40px;
+  height: 80%;
+  background: linear-gradient(to left, 
+    rgba(255, 200, 0, 0.9), 
+    rgba(255, 100, 0, 0.7), 
+    rgba(255, 50, 0, 0.4),
+    transparent
+  );
+  border-radius: 50% 0 0 50%;
+  filter: blur(2px);
+  animation: flame-trail 0.4s infinite linear;
+  transform-origin: right center;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Customized celebration text for comeback boost */
+.comeback-text {
+  position: absolute;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 24px;
+  color: gold;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 2px 0 black;
+  z-index: 100;
+  animation: celebrationText 2.5s forwards;
+  white-space: nowrap;
+  text-transform: uppercase;
+  transform: scale(0);
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.7), transparent);
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.confetti-gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  box-shadow: 0 0 10px #FFD700;
+}
+
+/* Make the boosted player more distinct */
+.racer img.boosted {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9)) brightness(1.1);
+  transition: filter 0.3s ease;
+}
