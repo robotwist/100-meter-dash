@@ -1989,3 +1989,63 @@ p {
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9)) brightness(1.1);
   transition: filter 0.3s ease;
 }
+
+.level-display-prominent {
+  color: var(--olympic-white);
+  font-size: 24px;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px var(--white-glow), 0 0 15px var(--blue-glow);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 15px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  animation: pulseGlow 3s infinite;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+.level-display-large {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--olympic-red);
+  text-shadow: 0 0 15px var(--red-glow);
+  letter-spacing: 2px;
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 3px 15px;
+  border-radius: 8px;
+  margin: 5px 0;
+  border: 2px solid rgba(193, 0, 29, 0.5);
+}
+
+.level-row {
+  background: rgba(0, 0, 50, 0.3);
+  padding: 10px 5px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+#characterSelectLevel {
+  font-size: 28px;
+  color: white;
+  text-transform: uppercase;
+  margin: 15px auto;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 10px var(--white-glow);
+  letter-spacing: 2px;
+  display: inline-block;
+  min-width: 300px;
+}
+
+#characterSelectLevel.comeback-active {
+  color: var(--olympic-gold);
+  text-shadow: 0 0 15px var(--gold-glow);
+  border-color: var(--olympic-gold);
+  animation: pulseGlow 2s infinite;
+  --glow-color: var(--gold-glow);
+}

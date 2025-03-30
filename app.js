@@ -32,6 +32,8 @@ let currentInitialsPosition = 0; // Tracks current position in initials input
 let currentInitials = "AAA"; // Default initials value
 let recentlyLost = false; // Track if player recently lost
 let comebackBoostActive = false; // Track if comeback boost is active
+let level4LossCount = 0; // Track consecutive losses at level 4
+let level5LossCount = 0; // Track consecutive losses at level 5
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -274,6 +276,37 @@ function hideLeaderboard() {
     postRaceScreen.style.display = 'flex';
   } else {
     characterSelection.style.display = 'flex';
+    // Show current level information on character selection screen
+    updateCharacterSelectionLevel();
+  }
+}
+
+// Function to update the level information on character selection screen
+function updateCharacterSelectionLevel() {
+  const levelIndicator = document.getElementById('characterSelectLevel');
+  if (levelIndicator) {
+    levelIndicator.textContent = currentLevel > 1 ? 
+      `STARTING LEVEL ${currentLevel}` : 
+      'STARTING LEVEL 1';
+      
+    // If comeback boost is active, show indicator
+    if (currentLevel === 3 && recentlyLost) {
+      levelIndicator.textContent += ' (COMEBACK BOOST ACTIVE)';
+      levelIndicator.classList.add('comeback-active');
+    } 
+    // For level 4 progression boost
+    else if (currentLevel === 4 && level4LossCount > 0) {
+      levelIndicator.textContent += ` (SPEED +${level4LossCount * 5}%)`;
+      levelIndicator.classList.add('comeback-active');
+    }
+    // For level 5 progression boost
+    else if (currentLevel === 5 && level5LossCount > 0) {
+      levelIndicator.textContent += ` (SPEED +${level5LossCount * 5}%)`;
+      levelIndicator.classList.add('comeback-active');
+    }
+    else {
+      levelIndicator.classList.remove('comeback-active');
+    }
   }
 }
 
@@ -500,7 +533,15 @@ boltButton.addEventListener('click', () => {
   player1Sprite.src = 'bolt-sprite.gif';
   player2Character = 'nkdman';
   player2Sprite.src = 'nkdman-running.gif';
-  setupGame();
+  
+  // Show level indicator message
+  const levelMessage = currentLevel > 1 ? `STARTING LEVEL ${currentLevel}` : 'STARTING LEVEL 1';
+  createCelebrationText(levelMessage, 0);
+  
+  // Short delay to show the level message
+  setTimeout(() => {
+    setupGame();
+  }, 1000);
 });
 
 // Add touch handler for mobile
@@ -512,11 +553,15 @@ boltButton.addEventListener('touchstart', (e) => {
   player2Character = 'nkdman';
   player2Sprite.src = 'nkdman-running.gif';
   
-  // Short delay for visual feedback
+  // Show level indicator message
+  const levelMessage = currentLevel > 1 ? `STARTING LEVEL ${currentLevel}` : 'STARTING LEVEL 1';
+  createCelebrationText(levelMessage, 0);
+  
+  // Short delay for visual feedback and to show level message
   setTimeout(() => {
     boltButton.classList.remove('button-clicked');
     setupGame();
-  }, 100);
+  }, 1000);
 });
 
 boltButton.addEventListener('touchend', (e) => {
@@ -529,7 +574,15 @@ nkdmanButton.addEventListener('click', () => {
   player1Sprite.src = 'nkdman-running.gif';
   player2Character = 'bolt';
   player2Sprite.src = 'bolt-sprite.gif';
-  setupGame();
+  
+  // Show level indicator message
+  const levelMessage = currentLevel > 1 ? `STARTING LEVEL ${currentLevel}` : 'STARTING LEVEL 1';
+  createCelebrationText(levelMessage, 0);
+  
+  // Short delay to show the level message
+  setTimeout(() => {
+    setupGame();
+  }, 1000);
 });
 
 // Add touch handler for mobile
@@ -541,11 +594,15 @@ nkdmanButton.addEventListener('touchstart', (e) => {
   player2Character = 'bolt';
   player2Sprite.src = 'bolt-sprite.gif';
   
-  // Short delay for visual feedback
+  // Show level indicator message
+  const levelMessage = currentLevel > 1 ? `STARTING LEVEL ${currentLevel}` : 'STARTING LEVEL 1';
+  createCelebrationText(levelMessage, 0);
+  
+  // Short delay for visual feedback and to show level message
   setTimeout(() => {
     nkdmanButton.classList.remove('button-clicked');
     setupGame();
-  }, 100);
+  }, 1000);
 });
 
 nkdmanButton.addEventListener('touchend', (e) => {
@@ -659,7 +716,18 @@ function setupGame() {
   
   // Update the level display
   if (levelDisplay) {
-    levelDisplay.textContent = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+    // Show level-appropriate progressive difficulty information
+    let levelText = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+    
+    if (currentLevel === 3 && recentlyLost) {
+      levelText += " (COMEBACK BOOST)";
+    } else if (currentLevel === 4 && level4LossCount > 0) {
+      levelText += ` (SPEED +${level4LossCount * 5}%)`;
+    } else if (currentLevel === 5 && level5LossCount > 0) {
+      levelText += ` (SPEED +${level5LossCount * 5}%)`;
+    }
+    
+    levelDisplay.textContent = levelText;
   }
   
   // Reset button appearance and text
@@ -903,27 +971,38 @@ function updateRacersPosition() {
 function updateDistanceDisplay() {
   document.getElementById('distance1').textContent = Math.min(distance1, goal).toFixed(1) + 'm';
   document.getElementById('distance2').textContent = Math.min(distance2, goal).toFixed(1) + 'm';
+  
+  // Always show level prominently during race
+  if (levelDisplay && gameState === 'racing') {
+    levelDisplay.textContent = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+    levelDisplay.classList.add('level-display-prominent');
+  }
 }
 
 // Function to handle countdown sequence
 function startCountdown() {
   isCountdownActive = true;
   
-  // "On your mark"
-  countdownDisplay.textContent = "On your mark";
+  // Show level indicator in countdown
+  countdownDisplay.textContent = spaceModeActive ? "SPACE MODE" : `LEVEL ${currentLevel}`;
   
   setTimeout(() => {
-    // "Get set"
-    countdownDisplay.textContent = "Get set";
+    // "On your mark"
+    countdownDisplay.textContent = "On your mark";
     
     setTimeout(() => {
-      // "GO!"
-      countdownDisplay.textContent = "GO!";
+      // "Get set"
+      countdownDisplay.textContent = "Get set";
       
       setTimeout(() => {
-        // Clear countdown and start the race
-        countdownDisplay.textContent = "";
-        startGame();
+        // "GO!"
+        countdownDisplay.textContent = "GO!";
+        
+        setTimeout(() => {
+          // Clear countdown and start the race
+          countdownDisplay.textContent = "";
+          startGame();
+        }, 1000);
       }, 1000);
     }, 1000);
   }, 1500);
@@ -938,6 +1017,10 @@ function startGame() {
   // Update action button
   actionButton.disabled = false;
   actionButton.textContent = 'RUN!';
+  
+  // Show a level indicator at the start of the race
+  const levelIndicator = spaceModeActive ? 'SPACE MODE' : `LEVEL ${currentLevel}`;
+  createCelebrationText(levelIndicator, 0);
   
   // Start timer
   startTime = new Date();
@@ -1021,15 +1104,41 @@ actionButton.addEventListener('click', () => {
         // Player won, advance to next level
         currentLevel++;
         recentlyLost = false; // Reset loss tracking after a win
+        
+        // Reset loss counters for the completed level
+        if (currentLevel - 1 === 4) {
+          level4LossCount = 0; // Reset level 4 counter after completing it
+        } else if (currentLevel - 1 === 5) {
+          level5LossCount = 0; // Reset level 5 counter after completing it
+        }
+        
         setupGame();
       } else {
-        // Player lost, go back to character selection
-        game.style.display = 'none';
-        postRaceScreen.style.display = 'none';
-        characterSelection.style.display = 'flex';
-        gameState = 'selection';
-        recentlyLost = true; // Track that player lost
-        currentLevel = 1; // Reset to level 1
+        // Player lost, try the same level again
+        createCelebrationText(`RETRYING LEVEL ${currentLevel}`, 0);
+        
+        // Increment the appropriate loss counter for progressive difficulty
+        if (currentLevel === 4) {
+          level4LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level4LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        } else if (currentLevel === 5) {
+          level5LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level5LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        }
+        
+        // Small delay to show the message
+        setTimeout(() => {
+          recentlyLost = true; // Track that player lost
+          setupGame(); // Stay at the same level
+        }, 1500);
       }
       break;
   }
@@ -1055,15 +1164,41 @@ if (continueButton) {
         // Player won, advance to next level
         currentLevel++;
         recentlyLost = false; // Reset loss tracking after a win
+        
+        // Reset loss counters for the completed level
+        if (currentLevel - 1 === 4) {
+          level4LossCount = 0; // Reset level 4 counter after completing it
+        } else if (currentLevel - 1 === 5) {
+          level5LossCount = 0; // Reset level 5 counter after completing it
+        }
+        
         setupGame();
       } else {
-        // Player lost, go back to character selection
-        game.style.display = 'none';
-        postRaceScreen.style.display = 'none';
-        characterSelection.style.display = 'flex';
-        gameState = 'selection';
-        recentlyLost = true; // Track that player lost
-        currentLevel = 1; // Reset to level 1
+        // Player lost, try the same level again
+        createCelebrationText(`RETRYING LEVEL ${currentLevel}`, 0);
+        
+        // Increment the appropriate loss counter for progressive difficulty
+        if (currentLevel === 4) {
+          level4LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level4LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        } else if (currentLevel === 5) {
+          level5LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level5LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        }
+        
+        // Small delay to show the message
+        setTimeout(() => {
+          recentlyLost = true; // Track that player lost
+          setupGame(); // Stay at the same level
+        }, 2000);
       }
     }
   });
@@ -1092,71 +1227,131 @@ if (continueButton) {
         currentLevel++;
         recentlyLost = false; // Reset loss tracking after a win
         
+        // Reset loss counters for the completed level
+        if (currentLevel - 1 === 4) {
+          level4LossCount = 0; // Reset level 4 counter after completing it
+        } else if (currentLevel - 1 === 5) {
+          level5LossCount = 0; // Reset level 5 counter after completing it
+        }
+        
         // Slight delay to allow button animation
         setTimeout(() => {
           continueButton.classList.remove('button-clicked');
           setupGame();
         }, 100);
       } else {
-        // Player lost, go back to character selection
+        // Player lost, try the same level again
+        createCelebrationText(`RETRYING LEVEL ${currentLevel}`, 0);
+        
+        // Increment the appropriate loss counter for progressive difficulty
+        if (currentLevel === 4) {
+          level4LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level4LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        } else if (currentLevel === 5) {
+          level5LossCount++;
+          
+          // Show boost message
+          setTimeout(() => {
+            createCelebrationText(`SPEED BOOST +${level5LossCount * 5}% ACTIVATED!`, 500);
+          }, 500);
+        }
+        
+        // Remove button clicked visual
         setTimeout(() => {
           continueButton.classList.remove('button-clicked');
-          game.style.display = 'none';
-          postRaceScreen.style.display = 'none';
-          characterSelection.style.display = 'flex';
-          gameState = 'selection';
-          recentlyLost = true; // Track that player lost
-          currentLevel = 1; // Reset to level 1
         }, 100);
+        
+        // Small delay to show the message
+        setTimeout(() => {
+          recentlyLost = true; // Track that player lost
+          setupGame(); // Stay at the same level
+        }, 1500);
       }
     }
-  });
-  
-  // Prevent default on touchend to avoid issues
-  continueButton.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    continueButton.classList.remove('button-clicked');
   });
 }
 
-// Add keyboard support for spacebar
-document.addEventListener('keydown', (e) => {
-  // 32 is the keycode for spacebar
-  if (e.keyCode === 32) {
-    // If the initials popup is visible, submit on spacebar
-    if (!initialsPopup.classList.contains('hidden')) {
-      e.preventDefault();
-      submitInitials();
-      return;
+// Add touch event handling for mobile - action button
+actionButton.addEventListener('touchstart', (e) => {
+  e.preventDefault(); // Prevent double actions and zoom
+  if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
+    movePlayer(1);
+    
+    // In space mode, also shoot if armed
+    if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+      shootAlien();
     }
     
-    if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
-      e.preventDefault(); // Prevent page scrolling
-      movePlayer(1);
+    // Provide visual feedback for touches
+    actionButton.classList.add('button-clicked');
+    setTimeout(() => {
+      actionButton.classList.remove('button-clicked');
+    }, 50);
+  } else if (gameState === 'finished' && !celebrationActive) {
+    // Add the shake effect when the button is touched
+    actionButton.classList.add('button-shaking');
+    
+    // Remove celebration effects
+    document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+      el.remove();
+    });
+    
+    // After shake animation, transition to post-race screen
+    setTimeout(() => {
+      actionButton.classList.remove('button-shaking');
       
-      // In space mode, also shoot if armed
-      if (spaceModeActive && player1Sprite.classList.contains('armed')) {
-        shootAlien();
+      // Clean up
+      if (gameInterval) clearInterval(gameInterval);
+      if (computerRunInterval) clearInterval(computerRunInterval);
+      
+      // Transition to post-race screen
+      showPostRaceScreen();
+    }, 500);
+  } else if (gameState === 'post-race') {
+    // Handle post-race touch events for the action button
+    if (winner === 'player1') {
+      // Player won, advance to next level
+      currentLevel++;
+      recentlyLost = false; // Reset loss tracking after a win
+        
+      // Reset loss counters for the completed level
+      if (currentLevel - 1 === 4) {
+        level4LossCount = 0; // Reset level 4 counter after completing it
+      } else if (currentLevel - 1 === 5) {
+        level5LossCount = 0; // Reset level 5 counter after completing it
+      }
+        
+      setupGame();
+    } else {
+      // Player lost, try the same level again
+      createCelebrationText(`RETRYING LEVEL ${currentLevel}`, 0);
+      
+      // Increment the appropriate loss counter for progressive difficulty
+      if (currentLevel === 4) {
+        level4LossCount++;
+        
+        // Show boost message
+        setTimeout(() => {
+          createCelebrationText(`SPEED BOOST +${level4LossCount * 5}% ACTIVATED!`, 500);
+        }, 500);
+      } else if (currentLevel === 5) {
+        level5LossCount++;
+        
+        // Show boost message
+        setTimeout(() => {
+          createCelebrationText(`SPEED BOOST +${level5LossCount * 5}% ACTIVATED!`, 500);
+        }, 500);
       }
       
-      // Provide visual feedback for spacebar presses
-      actionButton.classList.add('button-clicked');
+      // Small delay to show the message
       setTimeout(() => {
-        actionButton.classList.remove('button-clicked');
-      }, 50);
-    } else if (gameState === 'finished' && !celebrationActive) {
-      // Space to go to post-race screen - simulate button click for the shake effect
-      e.preventDefault();
-      actionButton.click();
-    } else if (gameState === 'post-race') {
-      // Space to continue to next level or character selection
-      e.preventDefault();
-      if (continueButton) {
-        continueButton.click();
-      } else {
-        // Fallback if continue button doesn't exist
-        actionButton.click();
-      }
+        recentlyLost = true; // Track that player lost
+        setupGame(); // Stay at the same level
+      }, 1500);
     }
   }
 });
@@ -1184,7 +1379,7 @@ function showPostRaceScreen() {
   // Show winner message
   const resultMessage = winner === 'player1' 
     ? 'VICTORY! ADVANCE TO NEXT LEVEL' 
-    : 'DEFEAT! TRY AGAIN FROM LEVEL 1';
+    : 'DEFEAT! TRY AGAIN';
   document.getElementById('postRaceResult').textContent = resultMessage;
   
   // If in space mode and player won, show special message
@@ -1200,7 +1395,7 @@ function showPostRaceScreen() {
   
   // Update continue button text based on win/loss
   if (continueButton) {
-    continueButton.textContent = winner === 'player1' ? 'NEXT LEVEL' : 'BACK TO START';
+    continueButton.textContent = winner === 'player1' ? 'NEXT LEVEL' : 'TRY AGAIN';
   }
   
   // Update level markers
@@ -1248,48 +1443,17 @@ function showPostRaceScreen() {
     }
   }
   
-  // Add auto-transition after 10 seconds to ensure mobile players can progress
-  // This helps if touch events don't register properly
-  let autoProgressTimer = setTimeout(() => {
-    // If we're still in post-race state after 10 seconds
-    if (gameState === 'post-race') {
-      // Make sure any pending initials entry is handled
-      if (pendingInitialsEntry) {
-        addTopTime(
-          pendingInitialsEntry.level, 
-          pendingInitialsEntry.time, 
-          currentInitials || "AAA"
-        );
-        pendingInitialsEntry = null;
-        initialsPopup.classList.add('hidden');
-      }
-      
-      // Flash the continue button to indicate auto-transition
-      if (continueButton) {
-        continueButton.classList.add('continue-highlight');
-        
-        setTimeout(() => {
-          // Simulate continue button click
-          if (winner === 'player1') {
-            // Player won, advance to next level
-            currentLevel++;
-            recentlyLost = false; // Reset loss tracking after a win
-            setupGame();
-          } else {
-            // Player lost, go back to character selection
-            game.style.display = 'none';
-            postRaceScreen.style.display = 'none';
-            characterSelection.style.display = 'flex';
-            gameState = 'selection';
-            recentlyLost = true; // Track that player lost
-            currentLevel = 1; // Reset to level 1
-          }
-          
-          continueButton.classList.remove('continue-highlight');
-        }, 1000);
-      }
-    }
-  }, 10000);
+  // Make continue button more noticeable
+  if (continueButton) {
+    // Add a pulsing effect to draw attention to the continue button
+    continueButton.classList.add('continue-highlight');
+    createCelebrationText(`TAP "${continueButton.textContent}" TO CONTINUE`, 2000);
+    
+    // Remove highlight after a few seconds
+    setTimeout(() => {
+      continueButton.classList.remove('continue-highlight');
+    }, 3000);
+  }
 }
 
 // Function to update the top times display in the post-race screen
@@ -1377,11 +1541,23 @@ function movePlayer(playerNum) {
     // The base calculation is tuned so that even with perfect clicking, this time is the minimum
     const speedMultiplier = 1.7;
     
-    // Apply comeback boost if active (25% speed boost)
-    const boostMultiplier = comebackBoostActive ? 1.25 : 1.0;
+    // Calculate progressive difficulty boost
+    let progressiveBoost = 1.0;
+    
+    // Apply boost depending on the level
+    if (currentLevel === 3 && recentlyLost) {
+      // Original comeback boost for level 3 (25% boost)
+      progressiveBoost = 1.25;
+    } else if (currentLevel === 4 && level4LossCount > 0) {
+      // For level 4: 5% boost per loss
+      progressiveBoost = 1 + (level4LossCount * 0.05);
+    } else if (currentLevel === 5 && level5LossCount > 0) {
+      // For level 5: 5% boost per loss
+      progressiveBoost = 1 + (level5LossCount * 0.05);
+    }
     
     // Calculate a capped movement amount - prevents exceeding human speed limits
-    const baseMovement = (Math.random() * 1.3 + 0.7) * speedMultiplier * difficultyFactor * boostMultiplier;
+    const baseMovement = (Math.random() * 1.3 + 0.7) * speedMultiplier * difficultyFactor * progressiveBoost;
     
     // Apply progress-based speed cap (simulates human energy limitations)
     const progressPercent = distance1 / goal;
@@ -1646,10 +1822,10 @@ function playCelebrationSequence() {
     }
   }, 6000);
   
-  // Show a "10 SECOND COOLDOWN" message after initial celebration
+  // Show a "WAITING FOR YOU" message after initial celebration
   setTimeout(() => {
     actionButton.style.opacity = '0.5';
-    actionButton.textContent = 'COOLDOWN...';
+    actionButton.textContent = 'COOLING DOWN...';
     
     // Create a countdown effect on the button
     let countdown = 5;
@@ -1676,23 +1852,8 @@ function playCelebrationSequence() {
       setTimeout(() => createConfetti(), i * 30);
     }
     
-    // Auto-progress to post-race screen after 5 seconds if user doesn't click the button
-    // This helps mobile users who might have difficulty with touch recognition
-    setTimeout(() => {
-      if (gameState === 'finished' && !celebrationActive) {
-        // Clean up
-        if (gameInterval) clearInterval(gameInterval);
-        if (computerRunInterval) clearInterval(computerRunInterval);
-        
-        // Remove celebration effects
-        document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
-          el.remove();
-        });
-        
-        // Transition to post-race screen
-        showPostRaceScreen();
-      }
-    }, 5000);
+    // Add guidance text to prompt user to click the button
+    createCelebrationText("TAP 'SEE RESULTS' WHEN READY", 0);
   }, 10000);
 }
 
@@ -1709,6 +1870,14 @@ function finishRace() {
   // Create result message with both times
   let resultMessage = '<div class="time-results">';
   
+  // Add level information at the top
+  resultMessage += `
+    <div class="result-row level-row">
+      <span class="result-label">Current level:</span>
+      <span class="result-time"><span class="level-display-large">${spaceModeActive ? 'SPACE' : currentLevel}</span></span>
+    </div>
+  `;
+  
   // Results display
   resultMessage += `
     <div class="result-row">
@@ -1718,14 +1887,6 @@ function finishRace() {
     <div class="result-row">
       <span class="result-label">Computer time:</span>
       <span class="result-time"><span class="time-display">${player2Time > 0 ? player2Time.toFixed(2) : 'DNF'}</span> seconds</span>
-    </div>
-  `;
-  
-  // Add level information
-  resultMessage += `
-    <div class="result-row">
-      <span class="result-label">Current level:</span>
-      <span class="result-time"><span class="level-display">${spaceModeActive ? 'SPACE' : currentLevel}</span></span>
     </div>
   `;
   
@@ -1880,60 +2041,55 @@ function updateLeaderboardDisplay(levelKey = 'level1') {
   });
 }
 
-// Add touch event handling for mobile - action button
-actionButton.addEventListener('touchstart', (e) => {
-  e.preventDefault(); // Prevent double actions and zoom
-  if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
-    movePlayer(1);
-    
-    // In space mode, also shoot if armed
-    if (spaceModeActive && player1Sprite.classList.contains('armed')) {
-      shootAlien();
+// Add keyboard support for spacebar
+document.addEventListener('keydown', (e) => {
+  // 32 is the keycode for spacebar
+  if (e.keyCode === 32) {
+    // If the initials popup is visible, submit on spacebar
+    if (!initialsPopup.classList.contains('hidden')) {
+      e.preventDefault();
+      submitInitials();
+      return;
     }
     
-    // Provide visual feedback for touches
-    actionButton.classList.add('button-clicked');
-    setTimeout(() => {
-      actionButton.classList.remove('button-clicked');
-    }, 50);
-  } else if (gameState === 'finished' && !celebrationActive) {
-    // Add the shake effect when the button is touched
-    actionButton.classList.add('button-shaking');
-    
-    // Remove celebration effects
-    document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
-      el.remove();
-    });
-    
-    // After shake animation, transition to post-race screen
-    setTimeout(() => {
-      actionButton.classList.remove('button-shaking');
+    if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
+      e.preventDefault(); // Prevent page scrolling
+      movePlayer(1);
       
-      // Clean up
-      if (gameInterval) clearInterval(gameInterval);
-      if (computerRunInterval) clearInterval(computerRunInterval);
+      // In space mode, also shoot if armed
+      if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+        shootAlien();
+      }
       
-      // Transition to post-race screen
-      showPostRaceScreen();
-    }, 500);
-  } else if (gameState === 'post-race') {
-    // Handle post-race touch events for the action button
-    if (winner === 'player1') {
-      // Player won, advance to next level
-      currentLevel++;
-      recentlyLost = false; // Reset loss tracking after a win
-      setupGame();
-    } else {
-      // Player lost, go back to character selection
-      game.style.display = 'none';
-      postRaceScreen.style.display = 'none';
-      characterSelection.style.display = 'flex';
-      gameState = 'selection';
-      recentlyLost = true; // Track that player lost
-      currentLevel = 1; // Reset to level 1
+      // Provide visual feedback for spacebar presses
+      actionButton.classList.add('button-clicked');
+      setTimeout(() => {
+        actionButton.classList.remove('button-clicked');
+      }, 50);
+    } else if (gameState === 'finished' && !celebrationActive) {
+      // Space to go to post-race screen - simulate button click for the shake effect
+      e.preventDefault();
+      actionButton.click();
+    } else if (gameState === 'post-race') {
+      // Space to continue to next level or character selection
+      e.preventDefault();
+      if (continueButton) {
+        continueButton.click();
+      } else {
+        // Fallback if continue button doesn't exist
+        actionButton.click();
+      }
     }
   }
 });
+
+// Prevent default on touchend to avoid issues
+if (continueButton) {
+  continueButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    continueButton.classList.remove('button-clicked');
+  });
+}
 
 // Prevent default on action button touchend to avoid issues
 actionButton.addEventListener('touchend', (e) => {
