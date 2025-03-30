@@ -350,6 +350,7 @@ h2 {
   border-radius: var(--container-radius);
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3), inset 0 1px 8px rgba(255, 255, 255, 0.1);
   position: relative;
+  z-index: 15;
 }
 
 /* Visual race track with lanes */
@@ -362,6 +363,7 @@ h2 {
   border-radius: calc(var(--container-radius) / 2);
   margin-bottom: 10px;
   border: 2px solid white;
+  z-index: 10;
 }
 
 /* Lane markings */
@@ -395,6 +397,7 @@ h2 {
     black 10px,
     black 20px
   );
+  z-index: 20;
 }
 
 /* Character sprite containers for actual race */
@@ -404,6 +407,7 @@ h2 {
   height: 60px;
   transition: left calc(0.5s * var(--race-speed-multiplier)) linear;
   left: 0;
+  z-index: 25;
 }
 
 .racer img {
@@ -474,7 +478,7 @@ h2 {
   animation: pulseWhiteGlow 3s infinite;
   --glow-color: var(--white-glow);
   margin: 20px auto;
-  z-index: 10;
+  z-index: 50;
 }
 
 #actionButton:active {
@@ -534,22 +538,22 @@ h2 {
 
 /* Celebration Text Animation */
 .celebration-text {
-  position: fixed;
-  transform-origin: center;
-  font-family: 'Impact', sans-serif;
-  font-weight: bold;
-  text-transform: uppercase;
-  z-index: 1000;
+  position: absolute;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 24px;
+  color: gold;
   text-shadow: 
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 2px 0 #000,
-    2px 2px 0 #000,
-    0 0 15px rgba(255, 255, 255, 0.7);
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 2px 0 black;
+  z-index: 500; /* High enough to be above game elements but below popup */
   animation: celebrationText 2.5s forwards;
-  pointer-events: none;
   white-space: nowrap;
-  letter-spacing: 2px;
+  text-transform: uppercase;
+  transform: scale(0);
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.7), transparent);
+  padding: 10px 20px;
+  border-radius: 5px;
 }
 
 /* Medal Styling */
@@ -563,7 +567,7 @@ h2 {
     0 0 0 4px #c9b037,
     0 0 0 6px #7a682b,
     0 0 20px rgba(255, 215, 0, 0.6);
-  z-index: 1000;
+  z-index: 310;
   animation: medalDrop 1.5s ease-in-out forwards;
   pointer-events: none;
 }
@@ -609,7 +613,7 @@ h2 {
   height: 10px;
   opacity: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: 300;
 }
 
 .confetti-red {
@@ -632,7 +636,7 @@ h2 {
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
-  z-index: 100;
+  z-index: 300;
 }
 
 .firework::before {
@@ -1686,8 +1690,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  transition: opacity 0.3s;
+  z-index: 1000; /* Ensure highest priority */
 }
 
 .initials-popup.hidden {
@@ -1706,6 +1709,7 @@ p {
   animation: pulseGlow 4s infinite;
   --glow-color: var(--blue-glow);
   position: relative;
+  z-index: 1001; /* Higher than the overlay */
 }
 
 .initials-content h3 {
@@ -1765,10 +1769,11 @@ p {
 }
 
 .character-controls {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 25px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+  z-index: 1002; /* Higher than content */
 }
 
 .control-column {
@@ -1995,11 +2000,12 @@ p {
   font-size: 24px;
   text-transform: uppercase;
   text-shadow: 0 0 10px var(--white-glow), 0 0 15px var(--blue-glow);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6); /* Darker background for better contrast */
   padding: 5px 15px;
   border-radius: 8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   position: relative;
+  z-index: 40; /* Higher than track elements */
   animation: pulseGlow 3s infinite;
   margin-bottom: 10px;
   letter-spacing: 2px;
@@ -2135,6 +2141,7 @@ p {
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><line x1="0" y1="0" x2="50" y2="50" style="stroke:rgba(255,255,255,0.2);stroke-width:1" /><line x1="50" y1="0" x2="0" y2="50" style="stroke:rgba(255,255,255,0.2);stroke-width:1" /></svg>');
   pointer-events: none;
   animation: rain 0.5s linear infinite;
+  z-index: 5; /* Below all other track elements */
 }
 
 @keyframes rain {
@@ -2231,6 +2238,7 @@ p {
   background-repeat: repeat;
   animation: twinkling 5s linear infinite;
   pointer-events: none;
+  z-index: 5; /* Below all other track elements */
 }
 
 @keyframes twinkling {

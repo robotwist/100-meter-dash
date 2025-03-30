@@ -34,6 +34,7 @@ let recentlyLost = false; // Track if player recently lost
 let comebackBoostActive = false; // Track if comeback boost is active
 let level4LossCount = 0; // Track consecutive losses at level 4
 let level5LossCount = 0; // Track consecutive losses at level 5
+let isEnteringInitials = false; // Flag to track if player is currently entering initials
 
 // DOM Elements
 const characterSelection = document.getElementById('characterSelection');
@@ -115,6 +116,9 @@ function showInitialsPopup(level, time, position) {
     time: time,
     position: position
   };
+  
+  // Set the flag to indicate we're entering initials
+  isEnteringInitials = true;
   
   // Reset the initials input and display
   currentInitials = "AAA";
@@ -226,6 +230,9 @@ function submitInitials() {
     
     // Hide the popup
     initialsPopup.classList.add('hidden');
+    
+    // Reset the initials entry flag
+    isEnteringInitials = false;
     
     // Update the top times display
     updateTopTimesDisplay();
@@ -529,6 +536,9 @@ detectMobileDevice();
 
 // Character selection
 boltButton.addEventListener('click', () => {
+  // Don't allow character selection while entering initials
+  if (isEnteringInitials) return;
+  
   player1Character = 'bolt';
   player1Sprite.src = 'bolt-sprite.gif';
   player2Character = 'nkdman';
@@ -547,6 +557,10 @@ boltButton.addEventListener('click', () => {
 // Add touch handler for mobile
 boltButton.addEventListener('touchstart', (e) => {
   e.preventDefault();
+  
+  // Don't allow character selection while entering initials
+  if (isEnteringInitials) return;
+  
   boltButton.classList.add('button-clicked');
   player1Character = 'bolt';
   player1Sprite.src = 'bolt-sprite.gif';
@@ -570,6 +584,9 @@ boltButton.addEventListener('touchend', (e) => {
 });
 
 nkdmanButton.addEventListener('click', () => {
+  // Don't allow character selection while entering initials
+  if (isEnteringInitials) return;
+  
   player1Character = 'nkdman';
   player1Sprite.src = 'nkdman-running.gif';
   player2Character = 'bolt';
@@ -588,6 +605,10 @@ nkdmanButton.addEventListener('click', () => {
 // Add touch handler for mobile
 nkdmanButton.addEventListener('touchstart', (e) => {
   e.preventDefault();
+  
+  // Don't allow character selection while entering initials
+  if (isEnteringInitials) return;
+  
   nkdmanButton.classList.add('button-clicked');
   player1Character = 'nkdman';
   player1Sprite.src = 'nkdman-running.gif';
@@ -688,6 +709,12 @@ function createComebackEffect() {
 
 // Function to setup the game and start countdown
 function setupGame() {
+  // Don't start a new game if player is entering initials
+  if (isEnteringInitials) {
+    console.log("Cannot start game while entering initials");
+    return;
+  }
+
   // Hide character selection and show game
   characterSelection.style.display = 'none';
   game.style.display = 'flex';
@@ -1098,8 +1125,10 @@ function startGame() {
   // Set up computer player based on current level
   // Base time is 9.72-10.2 seconds, gets 5% faster each level
   const levelSpeedBoost = 1 - ((currentLevel - 1) * 0.05);
-  const minTime = 9.72 * levelSpeedBoost;
-  const maxTime = 10.2 * levelSpeedBoost;
+  
+  // Calculate computer time ensuring it never goes below 9.56 seconds
+  let minTime = Math.max(9.72 * levelSpeedBoost, 9.56);
+  let maxTime = Math.max(10.2 * levelSpeedBoost, 9.56 + 0.3); // Keep a reasonable range above min
   
   // Computer finishes between adjusted times based on level
   const computerFinishTime = Math.random() * (maxTime - minTime) + minTime;
@@ -1107,7 +1136,7 @@ function startGame() {
   const distancePerUpdate = goal / (computerFinishTime * 1000 / updateInterval);
   
   // Show level-adjusted time in console for debugging
-  console.log(`Level ${currentLevel} - Computer finish time: ${computerFinishTime.toFixed(2)}s`);
+  console.log(`Level ${currentLevel} - Computer finish time: ${computerFinishTime.toFixed(2)}s (Floor: 9.56s)`);
   
   computerRunInterval = setInterval(() => {
     if (gameActive && !player2Finished && distance2 < goal) {
@@ -1227,7 +1256,11 @@ if (continueButton) {
         );
         pendingInitialsEntry = null;
         initialsPopup.classList.add('hidden');
+        isEnteringInitials = false;
       }
+      
+      // Don't proceed if we're still entering initials
+      if (isEnteringInitials) return;
       
       if (winner === 'player1') {
         // Player won, advance to next level
@@ -1289,6 +1322,15 @@ if (continueButton) {
         );
         pendingInitialsEntry = null;
         initialsPopup.classList.add('hidden');
+        isEnteringInitials = false;
+      }
+      
+      // Don't proceed if we're still entering initials
+      if (isEnteringInitials) {
+        setTimeout(() => {
+          continueButton.classList.remove('button-clicked');
+        }, 100);
+        return;
       }
       
       if (winner === 'player1') {
@@ -2118,6 +2160,12 @@ document.addEventListener('keydown', (e) => {
     if (!initialsPopup.classList.contains('hidden')) {
       e.preventDefault();
       submitInitials();
+      return;
+    }
+    
+    // Don't process game actions if entering initials
+    if (isEnteringInitials) {
+      e.preventDefault();
       return;
     }
     
