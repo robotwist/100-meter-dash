@@ -361,7 +361,23 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Submit button
   if (submitInitialsBtn) {
+    // Click handler
     submitInitialsBtn.addEventListener('click', submitInitials);
+    
+    // Touch handlers for mobile
+    submitInitialsBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      submitInitialsBtn.classList.add('button-clicked');
+      submitInitials();
+      setTimeout(() => {
+        submitInitialsBtn.classList.remove('button-clicked');
+      }, 100);
+    });
+    
+    submitInitialsBtn.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      submitInitialsBtn.classList.remove('button-clicked');
+    });
   }
 });
 
@@ -852,7 +868,7 @@ actionButton.addEventListener('click', () => {
         
         // Transition to post-race screen
         showPostRaceScreen();
-      }, 500); // Wait for shake animation to finish
+      }, 500);
       break;
       
     case 'post-race':
@@ -877,6 +893,7 @@ actionButton.addEventListener('click', () => {
 
 // Continue button on post-race screen
 if (continueButton) {
+  // Existing click handler
   continueButton.addEventListener('click', () => {
     if (gameState === 'post-race') {
       // If there's a pending initials entry, handle it with default initials
@@ -906,25 +923,57 @@ if (continueButton) {
       }
     }
   });
-}
-
-// Add touch event handling for mobile
-actionButton.addEventListener('touchstart', (e) => {
-  e.preventDefault(); // Prevent double actions and zoom
-  if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
-    movePlayer(1);
+  
+  // Add touch event handlers for mobile devices
+  continueButton.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Prevent double actions and zoom
     
-    // In space mode, also shoot if armed
-    if (spaceModeActive && player1Sprite.classList.contains('armed')) {
-      shootAlien();
+    if (gameState === 'post-race') {
+      // Add visual feedback
+      continueButton.classList.add('button-clicked');
+      
+      // If there's a pending initials entry, handle it with default initials
+      if (pendingInitialsEntry) {
+        addTopTime(
+          pendingInitialsEntry.level, 
+          pendingInitialsEntry.time, 
+          currentInitials || "AAA"
+        );
+        pendingInitialsEntry = null;
+        initialsPopup.classList.add('hidden');
+      }
+      
+      if (winner === 'player1') {
+        // Player won, advance to next level
+        currentLevel++;
+        recentlyLost = false; // Reset loss tracking after a win
+        
+        // Slight delay to allow button animation
+        setTimeout(() => {
+          continueButton.classList.remove('button-clicked');
+          setupGame();
+        }, 100);
+      } else {
+        // Player lost, go back to character selection
+        setTimeout(() => {
+          continueButton.classList.remove('button-clicked');
+          game.style.display = 'none';
+          postRaceScreen.style.display = 'none';
+          characterSelection.style.display = 'flex';
+          gameState = 'selection';
+          recentlyLost = true; // Track that player lost
+          currentLevel = 1; // Reset to level 1
+        }, 100);
+      }
     }
-  }
-});
-
-// Prevent default on touchend to avoid issues
-actionButton.addEventListener('touchend', (e) => {
-  e.preventDefault();
-});
+  });
+  
+  // Prevent default on touchend to avoid issues
+  continueButton.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    continueButton.classList.remove('button-clicked');
+  });
+}
 
 // Add keyboard support for spacebar
 document.addEventListener('keydown', (e) => {
@@ -1439,6 +1488,24 @@ function playCelebrationSequence() {
     for (let i = 0; i < 30; i++) {
       setTimeout(() => createConfetti(), i * 30);
     }
+    
+    // Auto-progress to post-race screen after 5 seconds if user doesn't click the button
+    // This helps mobile users who might have difficulty with touch recognition
+    setTimeout(() => {
+      if (gameState === 'finished' && !celebrationActive) {
+        // Clean up
+        if (gameInterval) clearInterval(gameInterval);
+        if (computerRunInterval) clearInterval(computerRunInterval);
+        
+        // Remove celebration effects
+        document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+          el.remove();
+        });
+        
+        // Transition to post-race screen
+        showPostRaceScreen();
+      }
+    }, 5000);
   }, 10000);
 }
 
@@ -1625,3 +1692,63 @@ function updateLeaderboardDisplay(levelKey = 'level1') {
     leaderboardContent.appendChild(row);
   });
 }
+
+// Add touch event handling for mobile - action button
+actionButton.addEventListener('touchstart', (e) => {
+  e.preventDefault(); // Prevent double actions and zoom
+  if (gameState === 'racing' && gameActive && !isCountdownActive && distance1 < goal) {
+    movePlayer(1);
+    
+    // In space mode, also shoot if armed
+    if (spaceModeActive && player1Sprite.classList.contains('armed')) {
+      shootAlien();
+    }
+    
+    // Provide visual feedback for touches
+    actionButton.classList.add('button-clicked');
+    setTimeout(() => {
+      actionButton.classList.remove('button-clicked');
+    }, 50);
+  } else if (gameState === 'finished' && !celebrationActive) {
+    // Add the shake effect when the button is touched
+    actionButton.classList.add('button-shaking');
+    
+    // Remove celebration effects
+    document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+      el.remove();
+    });
+    
+    // After shake animation, transition to post-race screen
+    setTimeout(() => {
+      actionButton.classList.remove('button-shaking');
+      
+      // Clean up
+      if (gameInterval) clearInterval(gameInterval);
+      if (computerRunInterval) clearInterval(computerRunInterval);
+      
+      // Transition to post-race screen
+      showPostRaceScreen();
+    }, 500);
+  } else if (gameState === 'post-race') {
+    // Handle post-race touch events for the action button
+    if (winner === 'player1') {
+      // Player won, advance to next level
+      currentLevel++;
+      recentlyLost = false; // Reset loss tracking after a win
+      setupGame();
+    } else {
+      // Player lost, go back to character selection
+      game.style.display = 'none';
+      postRaceScreen.style.display = 'none';
+      characterSelection.style.display = 'flex';
+      gameState = 'selection';
+      recentlyLost = true; // Track that player lost
+      currentLevel = 1; // Reset to level 1
+    }
+  }
+});
+
+// Prevent default on action button touchend to avoid issues
+actionButton.addEventListener('touchend', (e) => {
+  e.preventDefault();
+});

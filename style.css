@@ -768,7 +768,7 @@ p {
 /* Responsive design - FUNCTIONAL for different devices */
 @media (max-width: 600px), (pointer: coarse) {
   .mobile-only {
-    display: inline-block;
+    display: block;
   }
   
   .desktop-only {
@@ -777,6 +777,7 @@ p {
   
   body {
     padding: 10px;
+    font-size: 14px;
   }
   
   h1 {
@@ -784,7 +785,7 @@ p {
   }
   
   .countdown-display {
-    font-size: 32px;
+    font-size: 28px;
   }
   
   #characterSelection {
@@ -798,17 +799,18 @@ p {
   }
   
   .racetrack {
-    height: 100px;
+    height: 80px;
   }
   
-  /* Mobile-specific button enhancements - FUNCTIONAL */
+  /* Mobile-specific button enhancements */
   #actionButton {
     padding: 18px 30px;
     width: 85%;
-    min-height: 70px;
-    font-size: 24px;
     margin: 15px auto;
     border-radius: 16px;
+    font-size: 20px;
+    min-width: 200px;
+    min-height: 80px;
   }
   
   #actionButton:active {
@@ -817,25 +819,50 @@ p {
   
   #result {
     width: 95%;
-    padding: 15px;
-    margin-top: 20px;
+    margin-top: 15px;
+    padding: 10px;
   }
   
   .time-display {
-    font-size: 16px;
+    font-size: 24px;
   }
   
   #winnerText {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   .celebration-text {
-    font-size: 24px !important;
+    font-size: 20px !important;
   }
   
   .medal {
+    transform: scale(0.8);
+  }
+  
+  /* Improve continue button for touch */
+  .continue-button {
+    margin-top: 20px;
+    padding: 20px 30px;
+    font-size: 22px;
+    min-width: 220px;
+    min-height: 80px;
+    border-width: 4px;
+    /* Increase touch target size */
+    touch-action: manipulation;
+  }
+  
+  /* Improve character controls for touch */
+  .nav-button {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+  
+  .character-box {
     width: 60px;
     height: 60px;
+    font-size: 28px;
+    margin: 10px 5px;
   }
 }
 
