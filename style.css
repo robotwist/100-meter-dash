@@ -1,11 +1,16 @@
 /* Functional 1984 Olympics & NES Track & Field Theme */
 
+/* Typography update based on 1976 Olympics */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700&display=swap'); /* Similar to Frutiger */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap'); /* Similar to Univers */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); /* Digital font for timing displays */
+
 :root {
-  --olympic-blue: #00336e; /* Deeper blue */
-  --olympic-red: #c1001d; /* Deeper red */
-  --olympic-white: #ffffff;
+  --olympic-blue: #0085C7; /* Deeper blue */
+  --olympic-red: #DF0024; /* Deeper red */
+  --olympic-white: #FFFFFF;
   --olympic-silver: #c0c0c0;
-  --nes-dark-blue: #000060; /* Deeper dark blue */
+  --nes-dark-blue: #00509d; /* Deeper dark blue */
   --nes-black: #0f0f0f;
   --background-gradient: linear-gradient(to bottom, var(--olympic-blue), #001038);
   --button-scale: 1; /* Variable for button scaling */
@@ -13,12 +18,34 @@
   --container-radius: 12px; /* Unified border radius */
   --button-radius: 8px; /* Button border radius */
   --glow-color: rgba(255, 255, 255, 0.2); /* Base glow color */
-  --blue-glow: rgba(0, 51, 110, 0.5); /* Enhanced blue glow */
-  --red-glow: rgba(193, 0, 29, 0.5); /* Enhanced red glow */
-  --white-glow: rgba(255, 255, 255, 0.5); /* White glow instead of gold */
+  --blue-glow: rgba(0, 133, 199, 0.7); /* Enhanced blue glow */
+  --red-glow: rgba(223, 0, 36, 0.7); /* Enhanced red glow */
+  --white-glow: rgba(255, 255, 255, 0.7); /* White glow instead of gold */
   --track-length: 100%; /* Track length as percentage of screen width */
-  --race-speed-multiplier: 1.8; /* To adjust the race timing */
-  --medal-gold: #ffd700;
+  --race-speed-multiplier: 1; /* To adjust the race timing */
+  --medal-gold: #FFD700;
+  
+  /* Olympic colors */
+  --olympic-yellow: #F4C300;
+  --olympic-black: #000000;
+  --olympic-green: #009F3D;
+  --olympic-gold: #FFD700;
+  
+  /* Glow effects */
+  --gold-glow: rgba(255, 215, 0, 0.7);
+  
+  /* Typography system based on 1976 Olympics */
+  --font-heading: 'Archivo', sans-serif; /* Similar to Univers 75 */
+  --font-body: 'Archivo', sans-serif; /* Similar to Univers 55 */
+  --font-ui: 'Fira Sans', sans-serif; /* Similar to Frutiger */
+  --font-timing: 'Share Tech Mono', monospace; /* Similar to Omega timing displays */
+  
+  --nes-blue: #0078f0;
+  --race-speed-multiplier: 1;
+  --track-width: 700px;
+  --container-radius: 20px;
+  --button-radius: 12px;
+  --button-scale: 1;
 }
 
 /* Pulsing glow animation */
@@ -107,14 +134,16 @@
 
 body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
   margin: 0;
   background: linear-gradient(135deg, var(--nes-dark-blue) 0%, #000030 100%);
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-body);
   padding: 20px;
   color: white;
+  box-sizing: border-box;
   overflow-x: hidden;
 }
 
@@ -152,8 +181,8 @@ body {
 }
 
 h1 {
-  font-family: var(--font-title);
-  font-size: 36px;
+  font-family: var(--font-heading);
+  font-size: 42px;
   background: linear-gradient(
     to bottom,
     #c1001d 0%,   /* Deeper red */
@@ -173,17 +202,20 @@ h1 {
   letter-spacing: 2px;
   line-height: 1.2;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  position: relative;
+  z-index: 2;
 }
 
 /* Subtitle */
 .subtitle {
-  color: white;
-  font-size: 16px;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  color: var(--olympic-gold);
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 #000;
+  margin-bottom: 20px;
+  letter-spacing: 2px;
   text-align: center;
-  letter-spacing: 1px;
-  margin: 10px 0 20px;
-  font-family: 'Courier New', monospace;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 /* Game sections */
@@ -199,15 +231,16 @@ h2 {
 
 /* Countdown */
 .countdown-display {
-  font-size: 42px;
-  font-weight: bold;
-  color: var(--olympic-red);
-  text-align: center;
-  margin: 15px 0;
-  height: 50px;
-  text-shadow: 2px 2px 0 #000, 0 0 15px rgba(193, 0, 29, 0.5);
-  font-family: 'Courier New', monospace;
-  letter-spacing: 2px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--olympic-white);
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.8);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;
 }
 
 /* Character selection panel */
@@ -441,7 +474,7 @@ h2 {
 }
 
 #timeElapsed {
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-timing);
   font-weight: bold;
   color: var(--olympic-red);
   background-color: #000;
@@ -523,7 +556,7 @@ h2 {
   10% { transform: scale(1.8); background-color: white; box-shadow: 0 0 25px 12px var(--white-glow); }
   20% { transform: scale(2); background-color: white; box-shadow: 0 0 30px 15px var(--white-glow); }
   40% { transform: scale(2.2); background-color: var(--olympic-red); box-shadow: 0 0 40px 20px rgba(193, 0, 29, 0.7); }
-  60% { transform: scale(2.5); background-color: var(--olympic-blue); box-shadow: 0 0 40px 20px rgba(0, 51, 110, 0.7); }
+  60% { transform: scale(2.5); background-color: var(--olympic-blue); box-shadow: 0 0 40px 20px rgba(0, 133, 199, 0.7); }
   70% { transform: scale(2.6); background-color: white; box-shadow: 0 0 45px 25px rgba(255, 255, 255, 0.7); }
   80% { transform: scale(2.8); background-color: var(--olympic-red); box-shadow: 0 0 50px 30px rgba(193, 0, 29, 0.8); }
   100% { transform: scale(3); opacity: 0; box-shadow: 0 0 60px 35px transparent; }
@@ -539,7 +572,8 @@ h2 {
 /* Celebration Text Animation */
 .celebration-text {
   position: absolute;
-  font-family: 'Press Start 2P', cursive;
+  font-family: var(--font-heading);
+  font-weight: 700;
   font-size: 24px;
   color: gold;
   text-shadow: 
@@ -713,7 +747,7 @@ p {
   background-color: #000;
   padding: 3px 8px;
   margin: 0 5px;
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-timing);
   font-size: 20px;
   border: 1px solid #444;
   border-radius: calc(var(--container-radius) / 3);
@@ -1111,7 +1145,7 @@ p {
   text-transform: uppercase;
   letter-spacing: 1px;
   border: 2px solid white;
-  box-shadow: 0 0 10px rgba(0, 51, 110, 0.5);
+  box-shadow: 0 0 10px rgba(0, 133, 199, 0.5);
 }
 
 /* Space Mode Specifics */
@@ -1996,6 +2030,9 @@ p {
 }
 
 .level-display-prominent {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: 2px;
   color: var(--olympic-white);
   font-size: 24px;
   text-transform: uppercase;
@@ -2008,21 +2045,153 @@ p {
   z-index: 40; /* Higher than track elements */
   animation: pulseGlow 3s infinite;
   margin-bottom: 10px;
-  letter-spacing: 2px;
 }
 
-.level-display-large {
-  font-size: 32px;
-  font-weight: bold;
-  color: var(--olympic-red);
-  text-shadow: 0 0 15px var(--red-glow);
-  letter-spacing: 2px;
+/* Apply Frutiger-like font to all buttons */
+button, 
+.continue-button, 
+.back-button, 
+.leaderboard-button, 
+.records-button,
+.submit-initials,
+.nav-button,
+.leaderboard-tab {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Apply timing fonts to all time displays */
+.time-display, 
+#timeElapsed, 
+#playerTimeDisplay, 
+#computerTimeDisplay, 
+#timeDifference,
+.time-value,
+#recordTime {
+  font-family: var(--font-timing);
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: #ffff00; /* Classic Omega yellow */
+  background-color: #000000;
+  padding: 4px 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8), 0 0 8px rgba(255, 255, 0, 0.3);
+  position: relative;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 3px 15px;
+}
+
+/* For smaller timing displays */
+.time-value, 
+.top-time-value {
+  font-size: 16px;
+  padding: 2px 8px;
+}
+
+/* For primary timing displays */
+#timeElapsed, 
+#playerTimeDisplay, 
+#computerTimeDisplay {
+  font-size: 24px;
+  min-width: 120px;
+  text-align: center;
+}
+
+/* Add subtle LED effect to digital displays */
+.time-display::before,
+#timeElapsed::before, 
+#playerTimeDisplay::before, 
+#computerTimeDisplay::before, 
+#timeDifference::before,
+.time-value::before,
+#recordTime::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 0, 0.15) 0%, 
+    rgba(255, 255, 0, 0) 50%, 
+    rgba(255, 255, 0, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* mimic LED segments */
+.time-display span,
+#timeElapsed span, 
+#playerTimeDisplay span, 
+#computerTimeDisplay span, 
+#timeDifference span,
+.time-value span,
+#recordTime span {
+  position: relative;
+  display: inline-block;
+}
+
+/* When a race is active, intensify the glow on the elapsed time */
+.race-active #timeElapsed {
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8), 0 0 12px rgba(255, 255, 0, 0.6);
+}
+
+/* Style the character box numbers more distinctly like race numbers */
+.character-box {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  background-color: #000;
+  color: #fff;
+  border: 2px solid var(--olympic-blue);
   border-radius: 8px;
-  margin: 5px 0;
-  border: 2px solid rgba(193, 0, 29, 0.5);
+  padding: 5px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add racing bib number style to character boxes */
+.character-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.1) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  z-index: 0;
+}
+
+/* Strong headings with Univers 75-like font */
+h1, h2, h3, 
+.post-race-winner, 
+.top-times-header, 
+.level-badge,
+#characterSelectLevel,
+.countdown-display {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+/* Position and rank indicators with timing font */
+.position-display, 
+#recordPosition, 
+.rank,
+.time-rank {
+  font-family: var(--font-timing);
+}
+
+/* Update action button for consistency */
+#actionButton {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .level-row {

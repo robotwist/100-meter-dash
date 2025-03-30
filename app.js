@@ -1197,46 +1197,10 @@ actionButton.addEventListener('click', () => {
       break;
       
     case 'post-race':
-      // Return to character selection or next level
-      if (winner === 'player1') {
-        // Player won, advance to next level
-        currentLevel++;
-        recentlyLost = false; // Reset loss tracking after a win
-        
-        // Reset loss counters for the completed level
-        if (currentLevel - 1 === 4) {
-          level4LossCount = 0; // Reset level 4 counter after completing it
-        } else if (currentLevel - 1 === 5) {
-          level5LossCount = 0; // Reset level 5 counter after completing it
-        }
-        
-        setupGame();
-      } else {
-        // Player lost, try the same level again
-        createCelebrationText(`RETRYING LEVEL ${currentLevel}`, 0);
-        
-        // Increment the appropriate loss counter for progressive difficulty
-        if (currentLevel === 4) {
-          level4LossCount++;
-          
-          // Show boost message
-          setTimeout(() => {
-            createCelebrationText(`SPEED BOOST +${level4LossCount * 5}% ACTIVATED!`, 500);
-          }, 500);
-        } else if (currentLevel === 5) {
-          level5LossCount++;
-          
-          // Show boost message
-          setTimeout(() => {
-            createCelebrationText(`SPEED BOOST +${level5LossCount * 5}% ACTIVATED!`, 500);
-          }, 500);
-        }
-        
-        // Small delay to show the message
-        setTimeout(() => {
-          recentlyLost = true; // Track that player lost
-          setupGame(); // Stay at the same level
-        }, 1500);
+      // Handle action button in post-race state (missing case)
+      if (continueButton) {
+        // Simulate a click on the continue button
+        continueButton.click();
       }
       break;
   }
@@ -1300,7 +1264,7 @@ if (continueButton) {
         setTimeout(() => {
           recentlyLost = true; // Track that player lost
           setupGame(); // Stay at the same level
-        }, 2000);
+        }, 1500);
       }
     }
   });
