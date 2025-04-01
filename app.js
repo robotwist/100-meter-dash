@@ -1877,28 +1877,31 @@ function playCelebrationSequence() {
       countdown--;
       if (countdown <= 0) {
         clearInterval(countdownInterval);
+        
+        // Automatically proceed to the results screen after countdown
+        createCelebrationText("PROCEEDING TO RESULTS...", 0);
+        
+        // Short delay before proceeding to post-race screen
+        setTimeout(() => {
+          // Clean up any remaining celebration effects
+          document.querySelectorAll('.confetti, .firework, .celebration-text, .medal').forEach(el => {
+            el.remove();
+          });
+          
+          // Clean up
+          if (gameInterval) clearInterval(gameInterval);
+          if (computerRunInterval) clearInterval(computerRunInterval);
+          
+          // Transition to post-race screen
+          showPostRaceScreen();
+          celebrationActive = false;
+        }, 1500);
       } else {
         // Create one more celebration text in the center
         createCelebrationText(`${countdown}...`, 0);
       }
     }, 1000);
   }, 5000);
-  
-  // Gradually bring back the action button after celebration (10 seconds total)
-  setTimeout(() => {
-    actionButton.style.opacity = '1';
-    actionButton.disabled = false;
-    actionButton.textContent = 'SEE RESULTS';
-    celebrationActive = false;
-    
-    // Final burst of confetti when button becomes active
-    for (let i = 0; i < 30; i++) {
-      setTimeout(() => createConfetti(), i * 30);
-    }
-    
-    // Add guidance text to prompt user to click the button
-    createCelebrationText("TAP 'SEE RESULTS' WHEN READY", 0);
-  }, 10000);
 }
 
 // Function to handle race finish
